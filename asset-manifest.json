@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/compiladores/static/css/main.a208dc92.css",
+    "main.js": "/compiladores/static/js/main.d2ff4310.js",
+    "index.html": "/compiladores/index.html",
+    "main.a208dc92.css.map": "/compiladores/static/css/main.a208dc92.css.map",
+    "main.d2ff4310.js.map": "/compiladores/static/js/main.d2ff4310.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a208dc92.css",
+    "static/js/main.d2ff4310.js"
+  ]
+}
