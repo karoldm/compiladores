@@ -25,10 +25,14 @@ reservedWords.set("program", "PALAVRA RESERVADA PROGRAM");
 reservedWords.set("procedure", "PALAVRA RESERVADA PROCEDURE");
 reservedWords.set("int", "PALAVRA RESERVADA INT");
 reservedWords.set("boolean", "PALAVRA RESERVADA BOOLEAN");
+reservedWords.set("var", "PALAVRA RESERVADA VAR");
 reservedWords.set("read", "PALAVRA RESERVADA READ");
+reservedWords.set("write", "PALAVRA RESERVADA WRITE");
 reservedWords.set("true", "PALAVRA RESERVADA TRUE");
 reservedWords.set("false", "PALAVRA RESERVADA FALSE");
 reservedWords.set("and", "PALAVRA RESERVADA AND");
 reservedWords.set("or", "PALAVRA RESERVADA OR");
+reservedWords.set("div", "PALAVRA RESERVADA DIV");
+reservedWords.set("not", "PALAVRA RESERVADA NOT");
 
 export {reservedWords, reservedSymbols};
