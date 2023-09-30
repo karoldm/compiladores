@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { Columns, ITable } from "../../interfaces/table";
+import { Columns, ITokens } from "../../interfaces/table";
 
 const Wrapper = styled.table`
     padding: 6px;
@@ -33,7 +33,7 @@ const Container = styled.div`
 
 interface Props {
     columns: Columns[];
-    datas: ITable[];
+    datas: ITokens[];
   }
 
 export const Table = ({columns, datas}: Props) => {

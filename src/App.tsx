@@ -6,7 +6,8 @@ import { Errors } from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
 import { compileLexer } from './functions/lexer';
-import { ITable } from './interfaces/table';
+import { Parser } from './functions/parser';
+import { ITokens } from './interfaces/table';
 
 const Container = styled.main`
   display: grid;
@@ -31,13 +32,17 @@ function App() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState("");
   
-  const [tableData, setTableData] = useState<ITable[]>([]);
+  const [tableData, setTableData] = useState<ITokens[]>([]);
   const [errorsData, setErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
     const {table, errors} = compileLexer(code);
     setTableData(table);
     setErrorsData(errors);
+    console.log(table)
+    //const parser = new Parser(table);
+    //const parserErrors = parser.parse();
+    //console.log(parserErrors);
   }
 
   useEffect(() => {

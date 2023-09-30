@@ -14,6 +14,7 @@ reservedSymbols.set(">", "MAIOR");
 reservedSymbols.set("<=", "MENORIGUAL");
 reservedSymbols.set(">=", "MAIORIGUAL");
 reservedSymbols.set(":=", "ATRIBUICAO");
+reservedSymbols.set(",", "VIRG");
 reservedWords.set("begin", "PALAVRA RESERVADA BEGIN");
 reservedWords.set("end", "PALAVRA RESERVADA END");
 reservedWords.set("then", "PALAVRA RESERVADA THEN");
@@ -30,5 +31,6 @@ reservedWords.set("true", "PALAVRA RESERVADA TRUE");
 reservedWords.set("false", "PALAVRA RESERVADA FALSE");
 reservedWords.set("and", "PALAVRA RESERVADA AND");
 reservedWords.set("or", "PALAVRA RESERVADA OR");
+reservedWords.set("var", "PALAVRA RESERVADA VAR");
 
 export {reservedWords, reservedSymbols};

@@ -1,9 +1,9 @@
 import { reservedSymbols, reservedWords } from "../constants/reserved";
-import { ITable } from "../interfaces/table";
+import { ITokens } from "../interfaces/table";
 import { isReserved, isValidIdentifier, isValidInt, isValidFloat, isReservedSymbol } from "./is";
 
 
-let table: ITable[] = [];
+let table: ITokens[] = [];
 let errors: string[] = [];
 let initialColumn = 0;
 let text = "";
