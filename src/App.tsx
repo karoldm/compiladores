@@ -43,7 +43,7 @@ function App() {
     
     const parser = new Parser(table);
     const parserErrors = parser.parse();
-    console.log(parserErrors);
+    setErrorsData((previousErrors) => [...previousErrors, ...parserErrors]);
   }
 
   useEffect(() => {

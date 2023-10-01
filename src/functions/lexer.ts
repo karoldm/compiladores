@@ -37,7 +37,7 @@ class Lexer {
 
     if (isError){
       this.errors.push(
-          "Erro na linha " + 
+         token + " Na linha " + 
           this.line + 
           " coluna inicial " + 
           this.initialColumn + 
