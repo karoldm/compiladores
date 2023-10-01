@@ -1,226 +1,238 @@
 import { reservedSymbols, reservedWords } from "../constants/reserved";
 import { ITokens } from "../interfaces/table";
-import { isReserved, isValidIdentifier, isValidInt, isValidFloat, isReservedSymbol } from "./is";
+import { isReserved, isValidIdentifier, isValidInt, isValidFloat } from "./is";
 
+class Lexer {
+  table: ITokens[];
+  errors: string[];
+  initialColumn;
+  text;
+  current;
+  line;
+  i;
 
-let table: ITokens[] = [];
-let errors: string[] = [];
-let initialColumn = 0;
-let text = "";
-let current = "";
-let line = 0;
-let i = 0;
-
-function populateTable(
-  lexema: string, 
-  token: string, 
-  line: number, 
-  initialColumn: number, 
-  finalColumn: number,
-  isError: boolean,
-  ) {
-  table.push({
-    lexema: lexema, 
-    token: token,
-    linha: line, 
-    coluna_inicial: initialColumn,
-    coluna_final: finalColumn
-  });
-
-  if (isError){
-    errors.push("Erro na linha " + line+1 + " coluna inicial " + initialColumn + " coluna final " + finalColumn + ": " + token);
+  constructor(textcode: string){
+    this.text = textcode;
+    this.table = [];
+    this.errors = [];
+    this.initialColumn = 0;
+    this.current = "";
+    this.line = 0;
+    this.i = 0;
   }
-}
+  
+  populateTable(
+    lexema: string, 
+    token: string, 
+    finalColumn: number,
+    isError: boolean,
+    ) {
+    this.table.push({
+      lexema: lexema, 
+      token: token,
+      linha: this.line, 
+      coluna_inicial: this.initialColumn,
+      coluna_final: finalColumn
+    });
 
-function handleNewLine() {
-  line++;
-  initialColumn = 0;
-}
-
-function handleLineComment() {
-  while (i < text.length && text[i] !== "\n") {
-    i++;
-  }
-  line++;
-}
-
-function handleBlockComment(){
-  while (i < text.length && text[i] !== "}") {
-    if (text[i] === "\n") {
-      line++;
+    if (isError){
+      this.errors.push(
+          "Erro na linha " + 
+          this.line + 
+          " coluna inicial " + 
+          this.initialColumn + 
+          " coluna final " + 
+          finalColumn + 
+          ": " + 
+          token
+        );
     }
-    i++;
   }
-}
 
-function getReserved(input: string) {
-  return reservedSymbols.get(input) || reservedWords.get(input);
-}
+  handleNewLine() {
+    this.line++;
+    this.initialColumn = 0;
+  }
 
-function handleValidIdentifier(){
-  let char = text[i];
-  while (i < text.length && isValidIdentifier(current)) {
-      i++;
-      if (i < text.length) {
-        char = text[i];
-        current += char;
-      } else {
-        break;
+  handleLineComment() {
+    while (this.i < this.text.length && this.text[this.i] !== "\n") {
+      this.i++;
+    }
+    this.line++;
+  }
+
+  handleBlockComment(){
+    while (this.i < this.text.length && this.text[this.i] !== "}") {
+      if (this.text[this.i] === "\n") {
+        this.line++;
       }
-  }
-  let substr = current;
-  if (i < text.length) {
-    i--;
-    substr = substr.substring(0, substr.length - 1);
-  }
-  const finalColumn = initialColumn + substr.length - 1;
-  if (getReserved(substr)) {
-    populateTable(substr, getReserved(substr), line, initialColumn, finalColumn, false);
-  } else if (isValidIdentifier(substr)) {
-    if(substr.length >= 3 && substr.length <= 10){
-      populateTable(substr, "IDENTIFICADOR", line, initialColumn, finalColumn, false);
+      this.i++;
     }
-    else {
-      populateTable(substr, "INVALID IDENTIFIER SIZE", line, initialColumn, finalColumn, true);
-    }
-  } else {
-    populateTable(substr, "INVALID IDENTIFIER", line, initialColumn, finalColumn, true);
   }
-}
 
-function handleValidNumber(){
-  let canPopulate = true;
-  let currentChar = " ";
-  while (isValidInt(current) || isValidFloat(current) || current === ".") {
-    i++;
-    if (i < text.length) {
-      currentChar = text[i];
-      if (currentChar === ".") {
-        if (i + 1 < text.length && isValidInt(text[i + 1])) {
-          current += currentChar;
-          current += text[i + 1];
-          i++;
+  getReserved(input: string) {
+    return reservedSymbols.get(input) || reservedWords.get(input);
+  }
+
+  handleValidIdentifier(){
+    let char = this.text[this.i];
+    while (this.i < this.text.length && isValidIdentifier(this.current)) {
+      this.i++;
+        if (this.i < this.text.length) {
+          char = this.text[this.i];
+          this.current += char;
         } else {
-          current += currentChar;
-          i--;
-          populateTable(current, "INVALID TOKEN", line, initialColumn, initialColumn + current.length - 1, true);
-          canPopulate = false;
           break;
         }
-      } else {
-        current += currentChar;
+    }
+    let substr = this.current;
+    if (this.i < this.text.length) {
+      this.i--;
+      substr = substr.substring(0, substr.length - 1);
+    }
+    const finalColumn = this.initialColumn + substr.length - 1;
+    
+    if (this.getReserved(substr)) {
+      this.populateTable(substr, this.getReserved(substr), finalColumn, false);
+    } else if (isValidIdentifier(substr)) {
+      if(substr.length >= 3 && substr.length <= 10){
+        this.populateTable(substr, "IDENTIFICADOR", finalColumn, false);
+      }
+      else {
+        this.populateTable(substr, "INVALID IDENTIFIER SIZE", finalColumn, true);
       }
     } else {
-      break;
+      this.populateTable(substr, "INVALID IDENTIFIER",finalColumn, true);
     }
   }
-  if (isValidIdentifier(currentChar)) {
-    let invalidIdentifier = currentChar;
-    while (isValidIdentifier(invalidIdentifier)) {
-      i++;
-      if (i < text.length) {
-        currentChar = text[i];
-        invalidIdentifier += currentChar;
+
+  handleValidNumber(){
+    let canPopulate = true;
+    let currentChar = " ";
+    while (isValidInt(this.current) || isValidFloat(this.current) || this.current === ".") {
+      this.i++;
+      if (this.i < this.text.length) {
+        currentChar = this.text[this.i];
+        if (currentChar === ".") {
+          if (this.i + 1 < this.text.length && isValidInt(this.text[this.i + 1])) {
+            this.current += currentChar;
+            this.current += this.text[this.i + 1];
+            this.i++;
+          } else {
+            this.current += currentChar;
+            this.i--;
+            this.populateTable(this.current, "INVALID TOKEN", (this.initialColumn + this.current.length - 1), true);
+            canPopulate = false;
+            break;
+          }
+        } else {
+          this.current += currentChar;
+        }
       } else {
         break;
       }
     }
-    let substr = current + invalidIdentifier;
-    if (i < text.length) {
-      i--;
-      substr = substr.substring(0, substr.length - 1);
-    }
-    const finalColumn = initialColumn + substr.length - 1;
-    populateTable(substr, "INVALID IDENTIFIER", line, initialColumn, finalColumn, true);
-  } else if (canPopulate) {
-    let substr = current;
-    if (i < text.length) {
-      i--;
-      substr = substr.substring(0, substr.length - 1);
-    }
-    if (isValidInt(substr)) {
-      const finalColumn = initialColumn + substr.length - 1;
-      populateTable(substr, "NUMINT", line, initialColumn, finalColumn, false);
-    } else if (isValidFloat(substr)) {
-      const finalColumn = initialColumn + substr.length - 1;
-      populateTable(substr, "NUMFLOAT", line, initialColumn, finalColumn, false);
+    if (isValidIdentifier(currentChar)) {
+      let invalidIdentifier = currentChar;
+      while (isValidIdentifier(invalidIdentifier)) {
+        this.i++;
+        if(this.i < this.text.length) {
+          currentChar = this.text[this.i];
+          invalidIdentifier += currentChar;
+        } else {
+          break;
+        }
+      }
+      let substr = this.current + invalidIdentifier;
+      if (this.i < this.text.length) {
+        this.i--;
+        substr = substr.substring(0, substr.length - 1);
+      }
+      const finalColumn = this.initialColumn + substr.length - 1;
+      this.populateTable(substr, "INVALID IDENTIFIER", finalColumn, true);
+    } else if (canPopulate) {
+      let substr = this.current;
+      if (this.i < this.text.length) {
+        this.i--;
+        substr = substr.substring(0, substr.length - 1);
+      }
+      if (isValidInt(substr)) {
+        const finalColumn = this.initialColumn + substr.length - 1;
+        this.populateTable(substr, "NUMINT", finalColumn, false);
+      } else if (isValidFloat(substr)) {
+        const finalColumn = this.initialColumn + substr.length - 1;
+        this.populateTable(substr, "NUMFLOAT", finalColumn, false);
+      }
     }
   }
-}
 
-function handleReserved(){
-  while (isReserved(current)) {
-    i++;
-    if (i < text.length) {
-      current += text[i];
+  handleReserved(){
+    while (isReserved(this.current)) {
+      this.i++;
+      if (this.i < this.text.length) {
+        this.current += this.text[this.i];
+      } else {
+        break;
+      }
+    }
+    let substr = this.current;
+    if (this.i < this.text.length) {
+      this.i--;
+      substr = substr.substring(0, substr.length - 1);
+    }
+    const finalColumn = this.initialColumn + substr.length - 1;
+    if (this.getReserved(substr) !== undefined) {
+      this.populateTable(substr, this.getReserved(substr), finalColumn, false);
     } else {
-      break;
+      this.populateTable(substr, "INVALID TOKEN", finalColumn, true);
     }
   }
-  let substr = current;
-  if (i < text.length) {
-    i--;
-    substr = substr.substring(0, substr.length - 1);
-  }
-  const finalColumn = initialColumn + substr.length - 1;
-  if (getReserved(substr) !== undefined) {
-    populateTable(substr, getReserved(substr), line, initialColumn, finalColumn, false);
-  } else {
-    populateTable(substr, "INVALID TOKEN", line, initialColumn, finalColumn, true);
-  }
-}
 
-function compileLexer(textCode: string) {
-  text = textCode;
-  table = [];
-  errors = [];
-  initialColumn = 0;
-  current = "";
-  line = 1;
-  i = 0;
-  
-  while (i < text.length) {
-    current = text[i];
-    initialColumn++;
+  compile() {
     
-    // Quebra de linha
-    if (current === "\n") {
-      handleNewLine();
-    }
+    while (this.i < this.text.length) {
+      this.current = this.text[this.i];
+      this.initialColumn++;
+      
+      // Quebra de linha
+      if (this.current === "\n") {
+        this.handleNewLine();
+      }
 
-    // Tratamento de comentários de linha
-    else if (current === "/" && i + 1 < text.length && text[i + 1] === "/") {
-      handleLineComment();
-    }
+      // Tratamento de comentários de linha
+      else if (this.current === "/" && this.i + 1 < this.text.length && this.text[this.i + 1] === "/") {
+        this.handleLineComment();
+      }
 
-    // Tratamento de comentários de bloco
-    else if (current === "{") {
-      handleBlockComment();
-    }
+      // Tratamento de comentários de bloco
+      else if (this.current === "{") {
+        this.handleBlockComment();
+      }
 
-    // Tratamento de identificador válido
-    else if (isValidIdentifier(current)) {
-      handleValidIdentifier();
-    }
+      // Tratamento de identificador válido
+      else if (isValidIdentifier(this.current)) {
+        this.handleValidIdentifier();
+      }
 
-    // Tratamento de palavra ou símbolo reservado
-    else if (isReserved(current)) {
-     handleReserved();
-    }
+      // Tratamento de palavra ou símbolo reservado
+      else if (isReserved(this.current)) {
+        this.handleReserved();
+      }
 
-    // Tratamento de números válidos
-    else if (isValidInt(current) || current === ".") {
-      handleValidNumber();
-    }
+      // Tratamento de números válidos
+      else if (isValidInt(this.current) || this.current === ".") {
+        this.handleValidNumber();
+      }
 
-    // Lexema inválido
-    else if (current.trim().length > 0) {
-      populateTable(current, "INVALID TOKEN", line, initialColumn, initialColumn, true);
-    }
+      // Lexema inválido
+      else if (this.current.trim().length > 0) {
+        this.populateTable(this.current, "INVALID TOKEN", (this.initialColumn + this.current.length - 1), true);
+      }
 
-    i++;
+      this.i++;
+    }
+    return {table: this.table, errors: this.errors};
   }
-  return {table, errors};
-}
 
-export { compileLexer };
+}
+export { Lexer };

@@ -5,7 +5,7 @@ import { CodeEditor } from "./components/CodeEditor";
 import { Errors } from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
-import { compileLexer } from './functions/lexer';
+import { Lexer } from './functions/lexer';
 import { Parser } from './functions/parser';
 import { ITokens } from './interfaces/table';
 
@@ -36,11 +36,11 @@ function App() {
   const [errorsData, setErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
-    console.log('handle compile')
-    const {table, errors} = compileLexer(code);
-    console.log(errors)
+    const lexer = new Lexer(code);
+    const {table, errors} = lexer.compile();
     setTableData(table);
     setErrorsData(errors);
+    
     //const parser = new Parser(table);
     //const parserErrors = parser.parse();
     //console.log(parserErrors);
