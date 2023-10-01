@@ -17,7 +17,7 @@ class Lexer {
     this.errors = [];
     this.initialColumn = 0;
     this.current = "";
-    this.line = 0;
+    this.line = 1;
     this.i = 0;
   }
   
