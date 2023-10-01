@@ -36,10 +36,11 @@ function App() {
   const [errorsData, setErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
+    console.log('handle compile')
     const {table, errors} = compileLexer(code);
+    console.log(errors)
     setTableData(table);
     setErrorsData(errors);
-    console.log(table)
     //const parser = new Parser(table);
     //const parserErrors = parser.parse();
     //console.log(parserErrors);

@@ -17,6 +17,7 @@ function populateTable(
   line: number, 
   initialColumn: number, 
   finalColumn: number,
+  isError: boolean,
   ) {
   table.push({
     lexema: lexema, 
@@ -26,13 +27,14 @@ function populateTable(
     coluna_final: finalColumn
   });
 
-  if (token === "INVALID TOKEN" || token === "INVALID IDENTIFIER"){
-    errors.push("Erro na linha " + line+1 + " coluna inicial " + initialColumn + " coluna final " + finalColumn);
+  if (isError){
+    errors.push("Erro na linha " + line+1 + " coluna inicial " + initialColumn + " coluna final " + finalColumn + ": " + token);
   }
 }
 
 function handleNewLine() {
   line++;
+  initialColumn = 0;
 }
 
 function handleLineComment() {
@@ -57,14 +59,14 @@ function getReserved(input: string) {
 
 function handleValidIdentifier(){
   let char = text[i];
-  while (i < text.length && !isReservedSymbol(char) && char !== " " && char !== "/" && char !== "{" && char !== "\n") {
-    i++;
-    if (i < text.length) {
-      char = text[i];
-      current += char;
-    } else {
-      break;
-    }
+  while (i < text.length && isValidIdentifier(current)) {
+      i++;
+      if (i < text.length) {
+        char = text[i];
+        current += char;
+      } else {
+        break;
+      }
   }
   let substr = current;
   if (i < text.length) {
@@ -73,11 +75,16 @@ function handleValidIdentifier(){
   }
   const finalColumn = initialColumn + substr.length - 1;
   if (getReserved(substr)) {
-    populateTable(substr, getReserved(substr), line, initialColumn, finalColumn);
-  } else if (isValidIdentifier(substr) && substr.length >= 3 && substr.length <= 10) {
-    populateTable(substr, "IDENTIFICADOR", line, initialColumn, finalColumn);
+    populateTable(substr, getReserved(substr), line, initialColumn, finalColumn, false);
+  } else if (isValidIdentifier(substr)) {
+    if(substr.length >= 3 && substr.length <= 10){
+      populateTable(substr, "IDENTIFICADOR", line, initialColumn, finalColumn, false);
+    }
+    else {
+      populateTable(substr, "INVALID IDENTIFIER SIZE", line, initialColumn, finalColumn, true);
+    }
   } else {
-    populateTable(substr, "INVALID IDENTIFIER", line, initialColumn, finalColumn);
+    populateTable(substr, "INVALID IDENTIFIER", line, initialColumn, finalColumn, true);
   }
 }
 
@@ -96,7 +103,7 @@ function handleValidNumber(){
         } else {
           current += currentChar;
           i--;
-          populateTable(current, "INVALID TOKEN", line, initialColumn, initialColumn + current.length - 1);
+          populateTable(current, "INVALID TOKEN", line, initialColumn, initialColumn + current.length - 1, true);
           canPopulate = false;
           break;
         }
@@ -124,7 +131,7 @@ function handleValidNumber(){
       substr = substr.substring(0, substr.length - 1);
     }
     const finalColumn = initialColumn + substr.length - 1;
-    populateTable(substr, "INVALID IDENTIFIER", line, initialColumn, finalColumn);
+    populateTable(substr, "INVALID IDENTIFIER", line, initialColumn, finalColumn, true);
   } else if (canPopulate) {
     let substr = current;
     if (i < text.length) {
@@ -133,10 +140,10 @@ function handleValidNumber(){
     }
     if (isValidInt(substr)) {
       const finalColumn = initialColumn + substr.length - 1;
-      populateTable(substr, "NUMINT", line, initialColumn, finalColumn);
+      populateTable(substr, "NUMINT", line, initialColumn, finalColumn, false);
     } else if (isValidFloat(substr)) {
       const finalColumn = initialColumn + substr.length - 1;
-      populateTable(substr, "NUMFLOAT", line, initialColumn, finalColumn);
+      populateTable(substr, "NUMFLOAT", line, initialColumn, finalColumn, false);
     }
   }
 }
@@ -157,9 +164,9 @@ function handleReserved(){
   }
   const finalColumn = initialColumn + substr.length - 1;
   if (getReserved(substr) !== undefined) {
-    populateTable(substr, getReserved(substr), line, initialColumn, finalColumn);
+    populateTable(substr, getReserved(substr), line, initialColumn, finalColumn, false);
   } else {
-    populateTable(substr, "INVALID TOKEN", line, initialColumn, finalColumn);
+    populateTable(substr, "INVALID TOKEN", line, initialColumn, finalColumn, true);
   }
 }
 
@@ -169,13 +176,13 @@ function compileLexer(textCode: string) {
   errors = [];
   initialColumn = 0;
   current = "";
-  line = 0;
+  line = 1;
   i = 0;
   
   while (i < text.length) {
     current = text[i];
-    initialColumn = i;
-
+    initialColumn++;
+    
     // Quebra de linha
     if (current === "\n") {
       handleNewLine();
@@ -208,7 +215,7 @@ function compileLexer(textCode: string) {
 
     // Lexema inválido
     else if (current.trim().length > 0) {
-      populateTable(current, "INVALID TOKEN", line, initialColumn, initialColumn);
+      populateTable(current, "INVALID TOKEN", line, initialColumn, initialColumn, true);
     }
 
     i++;
