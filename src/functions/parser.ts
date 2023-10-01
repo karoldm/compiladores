@@ -16,38 +16,44 @@ export class Parser {
       return this.errors;
   }
 
-  consumeToken(expectedTokenType: string) {
+  consumeToken(expectedTokenType: any, sinc?: any) {
       const currentToken = this.tokens[this.currentTokenIndex];
-      if (currentToken && currentToken.token === expectedTokenType) {
+      if (currentToken && expectedTokenType.test(`/^${currentToken.token}^/`)) {
           this.currentTokenIndex++;
       } else {
           this.errors.push(`Esperado ${expectedTokenType}, encontrado ${currentToken.token}
           na linha ${currentToken.linha}, coluna inicial ${currentToken.coluna_inicial} até 
           coluna final ${currentToken.coluna_final}`);
+
+          if(sinc) {
+            while(this.currentTokenIndex < this.tokens.length && 
+                !sinc.test(`/^${this.tokens[this.currentTokenIndex].token}$/`) ){
+                this.currentTokenIndex++;
+            }
+        }
       }
   }
 
   programa() {
-      this.consumeToken('PALAVRA RESERVADA PROGRAM');
-      this.consumeToken('IDENTIFICADOR');
-      this.consumeToken('PONTOVIRG');
-      this.bloco();
+    this.consumeToken('PROGRAM', 'IDENTIFICADOR');
+    this.consumeToken('IDENTIFICADOR', 'PONTVIRG');
+    this.consumeToken('PONTOVIRG', 'VAR|INT|BOOLEAN|PROCEDURE|BEGIN|IF|WHILE|READ|WRITE');
+    
+    this.bloco();
+    this.consumeToken('PONTO');
   }
 
   bloco() {
-      if (this.tokens[this.currentTokenIndex].token === 'PALAVRA RESERVADA VAR') {
-          this.consumeToken('PALAVRA RESERVADA VAR');
-          this.declaracaoVariaveis();
-      }
-
-      // Implementar o resto do bloco nas etapas seguintes
+        this.declaracaoVariaveis();
+        // this.declaraoSubrotinhas();
+        // this.comandoComposto();
   }
 
   declaracaoVariaveis() {
       this.declaracaoVariavel();
       while (this.tokens[this.currentTokenIndex].token === 'PONTOVIRG' && 
       this.currentTokenIndex < this.tokens.length) {
-          this.consumeToken('PONTOVIRG');
+          this.consumeToken('PONTOVIRG', 'INT|BOOLEAN');
           this.declaracaoVariavel();
       }
   }
@@ -58,20 +64,14 @@ export class Parser {
   }
 
   tipo() {
-    const currentToken = this.tokens[this.currentTokenIndex];
-      if (currentToken.token === 'PALAVRA RESERVADA INT' || currentToken.token === 'PALAVRA RESERVADA BOOLEAN') {
-          this.consumeToken(currentToken.token);
-      } else {
-        this.errors.push(`Esperado int ou boolean na linha ${currentToken.linha}, 
-        coluna inicial ${currentToken.coluna_inicial} até coluna final ${currentToken.coluna_final}`);
-      }
+    this.consumeToken('INT|BOOLEAN', 'IDENTIFICADOR');
   }
 
   listaIdentificadores() {
-      this.consumeToken('IDENTIFICADOR');
+      this.consumeToken('IDENTIFICADOR', 'INT|BOOLEAN|PONTOVIRG');
       while (this.tokens[this.currentTokenIndex].token === 'VIRG') {
-          this.consumeToken('VIRG');
-          this.consumeToken('IDENTIFICADOR');
+          this.consumeToken('VIRG', 'IDENTIFICADOR');
+          this.consumeToken('IDENTIFICADOR', 'VIRG|PONTOVIRG');
       }
   }
 }

@@ -5,8 +5,8 @@ import { CodeEditor } from "./components/CodeEditor";
 import { Errors } from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
-import { Lexer } from './functions/lexer';
-import { Parser } from './functions/parser';
+import { Lexer } from './functions/Lexer';
+import { Parser } from './functions/Parser';
 import { ITokens } from './interfaces/table';
 
 const Container = styled.main`
@@ -41,9 +41,9 @@ function App() {
     setTableData(table);
     setErrorsData(errors);
     
-    //const parser = new Parser(table);
-    //const parserErrors = parser.parse();
-    //console.log(parserErrors);
+    const parser = new Parser(table);
+    const parserErrors = parser.parse();
+    console.log(parserErrors);
   }
 
   useEffect(() => {
