@@ -29,7 +29,7 @@ interface Props {
   errors: string[];
 }
 
-const Errors = ({ errors }: Props) => {
+export const Errors = ({ errors }: Props) => {
   const [errorString, setErrorString] = useState("");
 
   useEffect(() => {
@@ -50,4 +50,4 @@ const Errors = ({ errors }: Props) => {
   );
 }
 
-export default Errors;
+// export default Errors;

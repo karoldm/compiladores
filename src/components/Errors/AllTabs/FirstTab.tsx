@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import styled from "styled-components";
-import errorString from "../../Errors/index";
 
-const FirstTab = () => {
+
+interface Props {
+    errors: string[];
+}
+
+
+const FirstTab = (errors: any) => {
     return (
         <>
-            {errorString}
+            <div className="FirstTab">
+       {/* {errors.map(errors => <p>{errors.message}</p>)}
+           {errors} */}
+            </div>
         </>
     );
 }

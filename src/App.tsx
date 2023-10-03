@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { styled } from "styled-components";
 import { Button } from "./components/Button";
 import { CodeEditor } from "./components/CodeEditor";
-import  Errors from "./components/Errors";
+import { Errors } from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
 import { Lexer } from './functions/lexer';
 import { Parser } from './functions/parser';
 import { ITokens } from './interfaces/table';
 import Tabs from './components/Errors/TabComponent';
+import FirstTab from './components/Errors/AllTabs/FirstTab';
+import SecondTab from './components/Errors/AllTabs/SecondTab';
 
 const Container = styled.main`
   display: grid;
@@ -35,16 +37,21 @@ function App() {
   
   const [tableData, setTableData] = useState<ITokens[]>([]);
   const [errorsData, setErrorsData] = useState<string[]>([]);
+  const [errorsDataLexer, setErrorsDataLexer] = useState<string[]>([]);
+  const [errorsDataParser, setErrorsDataParser] = useState<string[]>([]);
+
 
   const handleCompile = () => {
     const lexer = new Lexer(code);
     const {table, errors} = lexer.compile();
     setTableData(table);
-    setErrorsData(errors);
+    setErrorsData((previousErrors) => [...previousErrors, ...parserErrors]);
+    setErrorsDataLexer(errors);
     
     const parser = new Parser(table);
     const parserErrors = parser.parse();
     setErrorsData((previousErrors) => [...previousErrors, ...parserErrors]);
+    setErrorsDataParser((previousErrors) => [...previousErrors, ...parserErrors]);
   }
 
   useEffect(() => {
@@ -65,8 +72,11 @@ function App() {
         <CodeEditor code={code} setCode={setCode} />
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
-      <Errors errors={errorsData} />
+      {/* <Errors errors={errorsData} /> */}
       <Tabs/>
+      <FirstTab errors={errorsDataLexer} />
+      <SecondTab errors={errorsDataParser} />  
+      
     </Container>
     </>
   );
