@@ -15,7 +15,7 @@ class Lexer {
     this.text = textcode;
     this.table = [];
     this.errors = [];
-    this.initialColumn = 0;
+    this.initialColumn = 1;
     this.current = "";
     this.line = 1;
     this.i = 0;
@@ -47,11 +47,12 @@ class Lexer {
           token
         );
     }
+    this.initialColumn = finalColumn;
   }
 
   handleNewLine() {
     this.line++;
-    this.initialColumn = 0;
+    this.initialColumn = 1;
   }
 
   handleLineComment() {
@@ -192,11 +193,11 @@ class Lexer {
     
     while (this.i < this.text.length) {
       this.current = this.text[this.i];
-      this.initialColumn++;
       
       // Quebra de linha
       if (this.current === "\n") {
         this.handleNewLine();
+        this.initialColumn--;
       }
 
       // Tratamento de comentários de linha
@@ -229,6 +230,7 @@ class Lexer {
         this.populateTable(this.current, "INVALID TOKEN", (this.initialColumn + this.current.length - 1), true);
       }
 
+      this.initialColumn++;
       this.i++;
     }
     return {table: this.table, errors: this.errors};
