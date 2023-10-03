@@ -24,6 +24,36 @@ const Textarea = styled.textarea`
   line-height: 1.4rem;
 `;
 
+const Erros = styled.p`
+  width: 100%;
+  font-size: 1rem;
+  color: rgb(200, 50, 50);;
+  padding: 0.6rem;
+  font-style: bold;
+`;
+
+const Divider = styled.ul`
+  width: 100%;
+  font-size: .8rem;
+
+`;
+
+const Tabs = styled.li`
+  width: 9%;
+  border-radius: 3px 3px 0px 0px;
+  font-size: .8rem;
+  display: inline-block;
+  color: rgb(200, 50, 50);;
+  margin-left: 3%;
+  padding-top: 8px;
+  text-align: center;
+  cursor: pointer;
+  &:active, &:hover{
+    border-top:  3px solid rgba(200, 50, 50, .5);;
+    background-color: white;
+  }
+`;
+
 interface Props {
   errors: string[];
 }
@@ -40,8 +70,15 @@ export const Errors =  ({ errors }: Props) => {
   }, [errors]);
 
   return (
+    <>
     <Container>
-      <Textarea value= { errorString } disabled />
+    <Erros>Erros</Erros>
+    <Divider>
+      <Tabs value = {1}>Análise léxica</Tabs>
+      <Tabs value = {2}>Análise sintática</Tabs>
+    </Divider>
+    <Textarea value= { errorString } disabled />
     </Container>
+    </>
   );
 }
