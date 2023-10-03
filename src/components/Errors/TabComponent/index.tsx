@@ -11,7 +11,6 @@ const Erros = styled.p`
   font-style: bold;
 `;
 
-
 const Tabs1 = styled.div`
     width: 100%;
     height: auto;

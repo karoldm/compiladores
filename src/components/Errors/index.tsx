@@ -29,7 +29,7 @@ interface Props {
   errors: string[];
 }
 
-export const Errors = ({ errors }: Props) => {
+const Errors = ({ errors }: Props) => {
   const [errorString, setErrorString] = useState("");
 
   useEffect(() => {
@@ -44,8 +44,10 @@ export const Errors = ({ errors }: Props) => {
 
   return (
     <></>
-      // <Container>
-      //   <Textarea value={errorString} disabled />
-      // </Container>
+    // <Container>
+    //   <Textarea value={errorString} disabled />
+    // </Container>
   );
 }
+
+export default Errors;

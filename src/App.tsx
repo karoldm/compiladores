@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { styled } from "styled-components";
 import { Button } from "./components/Button";
 import { CodeEditor } from "./components/CodeEditor";
-import { Errors } from "./components/Errors";
+import  Errors from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
 import { Lexer } from './functions/lexer';
