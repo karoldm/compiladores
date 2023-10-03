@@ -8,6 +8,7 @@ import { Table } from "./components/Table";
 import { Lexer } from './functions/lexer';
 import { Parser } from './functions/parser';
 import { ITokens } from './interfaces/table';
+import Tabs from './components/Errors/TabComponent';
 
 const Container = styled.main`
   display: grid;
@@ -51,6 +52,7 @@ function App() {
   }, [file]);
 
   return (
+    <>
     <Container>
       <div style={{display: 'flex', width: '100%', flexDirection: 'column'}}>
         <ButtonsContainer>
@@ -64,7 +66,9 @@ function App() {
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
       <Errors errors={errorsData} />
+      <Tabs/>
     </Container>
+    </>
   );
 }
 
