@@ -1,9 +1,9 @@
 import { reservedSymbols, reservedWords } from "../constants/reserved";
-import { ITokens } from "../interfaces/table";
+import { IToken } from "../interfaces/token";
 import { isReserved, isValidIdentifier, isValidInt, isValidFloat } from "./is";
 
 class Lexer {
-  table: ITokens[];
+  table: IToken[];
   errors: string[];
   initialColumn;
   text;

@@ -1,4 +1,4 @@
-export interface ITokens {
+export interface IToken {
   lexema: string;
   token: string;
   linha: number;

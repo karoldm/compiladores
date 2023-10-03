@@ -7,7 +7,7 @@ import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
 import { Lexer } from './functions/Lexer';
 import { Parser } from './functions/Parser';
-import { ITokens } from './interfaces/table';
+import { IToken } from './interfaces/token';
 
 const Container = styled.main`
   display: grid;
@@ -32,7 +32,7 @@ function App() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState("");
   
-  const [tableData, setTableData] = useState<ITokens[]>([]);
+  const [tableData, setTableData] = useState<IToken[]>([]);
   const [errorsData, setErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
