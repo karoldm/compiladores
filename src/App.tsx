@@ -5,8 +5,8 @@ import { CodeEditor } from "./components/CodeEditor";
 import { Errors } from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
-import { Lexer } from './functions/Lexer';
-import { Parser } from './functions/Parser';
+import { Lexer } from './functions/lexer';
+import { Parser } from './functions/parser';
 import { IToken } from './interfaces/token';
 
 const Container = styled.main`
