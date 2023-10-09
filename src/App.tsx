@@ -36,7 +36,7 @@ function App() {
   const [file, setFile] = useState("");
   
   const [tableData, setTableData] = useState<ITokens[]>([]);
-  const [errorsData, setErrorsData] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("lexer");
   const [errorsDataLexer, setErrorsDataLexer] = useState<string[]>([]);
   const [errorsDataParser, setErrorsDataParser] = useState<string[]>([]);
 
@@ -45,13 +45,11 @@ function App() {
     const lexer = new Lexer(code);
     const {table, errors} = lexer.compile();
     setTableData(table);
-    setErrorsData((previousErrors) => [...previousErrors, ...parserErrors]);
     setErrorsDataLexer(errors);
     
     const parser = new Parser(table);
     const parserErrors = parser.parse();
-    setErrorsData((previousErrors) => [...previousErrors, ...parserErrors]);
-    setErrorsDataParser((previousErrors) => [...previousErrors, ...parserErrors]);
+    setErrorsDataParser(parserErrors);
   }
 
   useEffect(() => {
@@ -73,10 +71,9 @@ function App() {
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
       {/* <Errors errors={errorsData} /> */}
-      <Tabs/>
-      <FirstTab errors={errorsDataLexer} />
-      <SecondTab errors={errorsDataParser} />  
-      
+      <Tabs setActiveTab={setActiveTab} activeTab={activeTab}/>
+      {activeTab === 'lexer' ? <FirstTab errors={errorsDataLexer} /> : 
+      <SecondTab errors={errorsDataParser} />}  
     </Container>
     </>
   );

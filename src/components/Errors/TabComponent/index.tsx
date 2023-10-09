@@ -63,8 +63,7 @@ const Li2 = styled.li`
     }
   `;
 
-const Tabs = () => {
-    const [activeTab, setActiveTab] = useState("tab1");
+const Tabs = ({setActiveTab, activeTab}: any) => {
 
     const handleTab1 = () => {
         setActiveTab("tab1");
