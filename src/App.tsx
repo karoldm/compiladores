@@ -28,22 +28,29 @@ const ButtonsContainer = styled.div`
   flex-wrap: wrap;
 `;
 
+const ErrorsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+`;
+
 function App() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState("");
   
   const [tableData, setTableData] = useState<IToken[]>([]);
-  const [errorsData, setErrorsData] = useState<string[]>([]);
+  const [lexerErrorsData, setLexerErrorsData] = useState<string[]>([]);
+  const [parserErrorsData, setParserErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
     const lexer = new Lexer(code);
     const {table, errors} = lexer.compile();
     setTableData(table);
-    setErrorsData(errors);
+    setLexerErrorsData(errors);
     
     const parser = new Parser(table);
     const parserErrors = parser.parse();
-    setErrorsData((previousErrors) => [...previousErrors, ...parserErrors]);
+    setParserErrorsData(parserErrors);
   }
 
   useEffect(() => {
@@ -63,7 +70,10 @@ function App() {
         <CodeEditor code={code} setCode={setCode} />
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
-      <Errors errors={errorsData} />
+      <ErrorsContainer>
+        <Errors errors={lexerErrorsData} />
+        <Errors errors={parserErrorsData} />
+      </ErrorsContainer>
     </Container>
   );
 }

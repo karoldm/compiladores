@@ -10,7 +10,7 @@ const Container = styled.div`
   justify-content: center;
   gap: 16px;
   height: 180px;
-  border: 1px solid rgba(200, 50, 50, .5);
+  border: 1px solid black;
 `;
 
 const Textarea = styled.textarea`
@@ -19,7 +19,6 @@ const Textarea = styled.textarea`
   overflow-y: scroll;
   border: 1px solid #ccc;
   font-size: .8rem;
-  color: rgb(200, 50, 50);;
   padding: 1rem;
   line-height: 1.4rem;
 `;
@@ -40,8 +39,12 @@ export const Errors =  ({ errors }: Props) => {
   }, [errors]);
 
   return (
-    <Container>
-      <Textarea value= { errorString } disabled />
+    <Container style={{borderColor: errorString ? "red" : "green"}} >
+      <Textarea 
+      style={{color: errorString ? "red" : "green"}} 
+      value= { errorString || "Nenhum erro encontrado :)" } 
+      disabled 
+    />
     </Container>
   );
 }

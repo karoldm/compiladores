@@ -91,9 +91,17 @@ export class Parser {
     listaIdentificadores() {
         this.consumeToken('IDENTIFICADOR', 'PONTOVIRG');
         while (this.currentTokenIndex < this.tokens.length && 
-          this.tokens[this.currentTokenIndex].token === 'VIRG' && 
-          this.canContinueRule) {
-            this.consumeToken('VIRG', 'IDENTIFICADOR');
+          this.tokens[this.currentTokenIndex].token !== 'PONTOVIRG') {
+
+            if(this.tokens[this.currentTokenIndex].token === 'IDENTIFICADOR' ||
+               this.tokens[this.currentTokenIndex].token === 'VIRG') {
+              this.consumeToken('VIRG', 'IDENTIFICADOR');
+            }
+
+            else {
+              break;
+            }
+
             this.consumeToken('IDENTIFICADOR', '(VIRG|PONTOVIRG|PONTO)');
         }
       }
