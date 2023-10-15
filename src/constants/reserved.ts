@@ -7,6 +7,7 @@ reservedSymbols.set("div", "OPDIV");
 reservedSymbols.set("(", "AP");
 reservedSymbols.set(")", "FP");
 reservedSymbols.set(";", "PONTOVIRG");
+reservedSymbols.set(":", "DOISPONTOS");
 reservedSymbols.set("<", "MENOR");        
 reservedSymbols.set("<>", "DIFERENTE");        
 reservedSymbols.set("=", "IGUAL");
