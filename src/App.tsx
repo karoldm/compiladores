@@ -71,8 +71,8 @@ function App() {
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
       <ErrorsContainer>
-        <Errors errors={lexerErrorsData} />
-        <Errors errors={parserErrorsData} />
+        <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
+        <Errors title={'Erros sintáticos'} errors={parserErrorsData} />
       </ErrorsContainer>
     </Container>
   );
