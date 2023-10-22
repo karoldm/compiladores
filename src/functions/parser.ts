@@ -137,7 +137,7 @@ export class Parser {
         this.tokens[this.currentTokenIndex+1] &&
         this.tokens[this.currentTokenIndex].token === 'PONTOVIRG' &&  
         this.tokens[this.currentTokenIndex+1].token === 'FP') {
-        this.consumeToken('PONTOVIRG', '(PONTOVIRG)');
+        this.consumeToken('PONTOVIRG', 'PONTOVIRG');
         this.secaoParametrosFormais();
       }
       this.consumeToken('FP', 'PONTOVIRG');
