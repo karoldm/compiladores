@@ -1,8 +1,8 @@
 import { reservedSymbols, reservedWords } from "../constants/reserved";
 
 function isValidInt(input: string) {
-  const unsignedIntRegex = /^\d+$/;
-  return unsignedIntRegex.test(input);
+  const signedIntRegex = /^-?\d+$/;
+  return signedIntRegex.test(input);
 }
 
 function isValidFloat(input: string) {

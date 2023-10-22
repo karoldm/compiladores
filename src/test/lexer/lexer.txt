@@ -1,6 +1,9 @@
+program program1;
 _abc := .5345+(-b);,
 // kldsjfsjsd
 {kdsjfkld
 sdçlfkçsd
 }
-boolean 34yty34 = false;
+if true then
+  boolean 34yty34 = false;
+.

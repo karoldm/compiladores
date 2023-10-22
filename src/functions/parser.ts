@@ -4,11 +4,13 @@ export class Parser {
   tokens: IToken[]; 
   currentTokenIndex: number;
   errors: string[];
+  canContinue: boolean;
 
   constructor(tokens: IToken[]) {
       this.tokens = tokens;
       this.currentTokenIndex = 0;
       this.errors = [];
+      this.canContinue = true;
   }
 
   parse() {
@@ -16,79 +18,77 @@ export class Parser {
       return this.errors;
   }
 
-  createPattern(expectedPattern: string) {
-    return `^${expectedPattern}$`;
-  }
-
   consumeToken(expectedToken: string, sinc?: string) {
       const currentToken = this.tokens[this.currentTokenIndex];
       
       if(this.currentTokenIndex >= this.tokens.length){
-        this.errors.push(`Esperado ${expectedToken} no finla do arquivo`);
-        return;
+        this.errors.push(`Esperado ${expectedToken}, encontrado EOF`);
+          return;
       }
-      
-      const regexToken = new RegExp(this.createPattern(expectedToken), 'g');
-      // console.log(currentToken)
+      const regexToken = new RegExp(`\\b${expectedToken}\\b`, 'g');
+      // console.log(expectedToken)
+
       if (currentToken && regexToken.test(currentToken.token)) {
         this.currentTokenIndex++;
-      } else {
+        this.canContinue = true;
+      } else if(this.canContinue){
           this.errors.push(`Esperado ${expectedToken}, encontrado ${currentToken.token}
           na linha ${currentToken.linha}, coluna inicial ${currentToken.coluna_inicial} até 
           coluna final ${currentToken.coluna_final}`);
-
           if(sinc) {
-            const regexSinc = new RegExp(sinc, 'g');
-            console.log(sinc)            
-            while(this.currentTokenIndex < this.tokens.length && 
+            const regexSinc = new RegExp(`\\b${sinc}\\b`, 'g');           
+            while(this.tokens[this.currentTokenIndex] && 
               !regexSinc.test(this.tokens[this.currentTokenIndex].token) ){
-                //console.log(this.tokens[this.currentTokenIndex].token)
-                //console.log(regexSinc.test(this.tokens[this.currentTokenIndex].token))
                 this.currentTokenIndex++;
               }
-              console.log(this.tokens[this.currentTokenIndex])
-        }
+            }
+          this.canContinue = false;
       }
   }
 
   // program
   programa() {
-      this.consumeToken('PROGRAM', 'IDENTIFICADOR');
-      this.consumeToken('IDENTIFICADOR', 'PONTOVIRG');
-      this.consumeToken('PONTOVIRG');
+      this.consumeToken('PROGRAM', '(INT|BOOLEAN|PROCEDURE|BEGIN)');
+      this.consumeToken('IDENTIFICADOR', '(INT|BOOLEAN|PROCEDURE|BEGIN)');
+      this.consumeToken('PONTOVIRG', '(INT|BOOLEAN|PROCEDURE|BEGIN)');
       
       this.bloco();
       this.consumeToken('PONTO');
     }
     
     bloco() {
-      const current = this.tokens[this.currentTokenIndex].token;
-      if(current === 'INT' || current === 'BOOLEAN'){
-        this.declaracaoVariaveis();
+      if(this.tokens[this.currentTokenIndex]) {
+        if(this.tokens[this.currentTokenIndex].token === 'INT' ||
+        this.tokens[this.currentTokenIndex].token === 'BOOLEAN'){
+          this.parteDeclaracaoVariaveis();
+        }
+        if(this.tokens[this.currentTokenIndex].token === 'PROCEDURE'){
+          this.parteDeclaracaoSubrotinas();
+        }
+        this.comandoComposto();
       }
-      if(current === 'READ' || current === 'WRITE'){
-        this.declaracaoSubrotinas();
+      else {
+        this.consumeToken('(INT|BOOLEAN|PROCEDURE|BEGIN)');
       }
-      this.comandoComposto();
     }
     
     // declarações
-    declaracaoVariaveis() {
+    parteDeclaracaoVariaveis() {
       this.declaracaoVariavel();
-      while (this.currentTokenIndex < this.tokens.length && 
-        ['BOOLEAN', 'INT'].includes(this.tokens[this.currentTokenIndex].token)) {
-          this.declaracaoVariavel();
-        }
+      while (this.tokens[this.currentTokenIndex] && 
+      this.tokens[this.currentTokenIndex].token === 'PONTOVIRG' && 
+      this.tokens[this.currentTokenIndex+1] &&
+      ['INT', 'BOOLEAN'].includes(this.tokens[this.currentTokenIndex+1].token)) {
+        this.consumeToken('PONTOVIRG');
+        this.declaracaoVariavel();
       }
+      this.consumeToken('PONTOVIRG', '(PROCEDURE|BEGIN)')
+    }
       
     declaracaoVariavel() {
-      if(this.currentTokenIndex < this.tokens.length && 
-        ['BOOLEAN', 'INT'].includes(this.tokens[this.currentTokenIndex].token)) {
-          this.tipo();
-          this.listaIdentificadores();
-          this.consumeToken('PONTOVIRG');
-        }
-      }
+      this.tipo();
+      this.listaIdentificadores();
+    }
       
     tipo() {
       this.consumeToken('(INT|BOOLEAN)', 'IDENTIFICADOR');
@@ -96,87 +96,95 @@ export class Parser {
 
     listaIdentificadores() {
         this.consumeToken('IDENTIFICADOR', 'PONTOVIRG');
-        while (this.currentTokenIndex < this.tokens.length && 
-          this.tokens[this.currentTokenIndex].token !== 'PONTOVIRG') {
+        while (this.tokens[this.currentTokenIndex] && 
+          this.tokens[this.currentTokenIndex].token !== 'PONTOVIRG' && 
+          this.tokens[this.currentTokenIndex].token !== 'DOISPONTOS') {
 
             if(this.tokens[this.currentTokenIndex].token === 'IDENTIFICADOR' ||
                 this.tokens[this.currentTokenIndex].token === 'VIRG') {
-              this.consumeToken('VIRG', 'IDENTIFICADOR');
+              this.consumeToken('VIRG', 'PONTOVIRG');
             }
-
             else {
               break;
             }
-
-            this.consumeToken('IDENTIFICADOR', '(VIRG|PONTOVIRG|PONTO)');
+            this.consumeToken('IDENTIFICADOR', 'PONTOVIRG');
         }
     }
 
-    declaracaoSubrotinas() {
-      while(this.currentTokenIndex < this.tokens.length && 
+    parteDeclaracaoSubrotinas() {
+      while(this.tokens[this.currentTokenIndex] && 
         this.tokens[this.currentTokenIndex].token === 'PROCEDURE'){
           this.declaracaoProcedimento();
-          this.consumeToken('PONTOVIRG');
+          this.consumeToken('PONTOVIRG', 'BEGIN');
         }
     }
 
     declaracaoProcedimento() {
-      this.consumeToken('PROCEDURE', 'IDENTIFICADOR');
+      this.consumeToken('PROCEDURE', 'PONTOVIRG');
       this.consumeToken('IDENTIFICADOR', 'PONTOVIRG');
-      if(this.currentTokenIndex < this.tokens.length &&
+      if(this.tokens[this.currentTokenIndex] &&
         this.tokens[this.currentTokenIndex].token === 'AP'){
         this.parametrosFormais();
       }
-      this.consumeToken('PONTOVIRG');
+      this.consumeToken('PONTOVIRG', 'BEGIN');
       this.bloco();
     }
 
     parametrosFormais() {
-      this.consumeToken('AP', 'IDENTIFICADOR');
+      this.consumeToken('AP', '(PONTOVIRG)');
       this.secaoParametrosFormais();
-      while(this.currentTokenIndex < this.tokens.length  
-        && this.tokens[this.currentTokenIndex].token === 'PONTOVIRG') {
-        this.consumeToken('PONTVIRG');
+      while(this.tokens[this.currentTokenIndex] &&
+        this.tokens[this.currentTokenIndex+1] &&
+        this.tokens[this.currentTokenIndex].token === 'PONTOVIRG' &&  
+        this.tokens[this.currentTokenIndex+1].token === 'FP') {
+        this.consumeToken('PONTOVIRG', '(PONTOVIRG)');
         this.secaoParametrosFormais();
       }
-      this.consumeToken('FP');
+      this.consumeToken('FP', 'PONTOVIRG');
     }
 
     secaoParametrosFormais() {
-      if(this.tokens[this.currentTokenIndex].token === 'VAR'){
+      if(this.tokens[this.currentTokenIndex] && 
+      this.tokens[this.currentTokenIndex].token === 'VAR'){
         this.consumeToken('VAR')
       }
       this.listaIdentificadores();
-      this.consumeToken('DOISPONTOS', 'IDENTIFICADOR');
-      this.consumeToken('IDENTIFICADOR');
+      this.consumeToken('DOISPONTOS', 'FP');
+      this.consumeToken('(INT|BOOLEAN)', 'FP');
     }
 
     // comandos 
-    comandoComposto() {
-      this.consumeToken('BEGIN', '(IDENTIFICADOR|BEGIN|IF|WHILE)');
+    comandoComposto(){
+      if(!this.tokens[this.currentTokenIndex]) return;
+      const current = this.tokens[this.currentTokenIndex].token;
+      this.consumeToken('BEGIN', '(PONTO|END|ELSE)');
       this.comando();
-      while(this.currentTokenIndex < this.tokens.length &&
-        this.tokens[this.currentTokenIndex].token === 'PONTOVIRG'){
-          this.consumeToken('PONTOVIRG');
-          this.comando();
-        }
-      this.consumeToken('END');
+      while(this.tokens[this.currentTokenIndex] &&
+      this.tokens[this.currentTokenIndex+1] &&
+      ['IDENTIFICADOR', 'READ', 'WRITE', 'BEGIN', 'IF', 'WHILE']
+      .includes(this.tokens[this.currentTokenIndex+1].token)){
+        this.consumeToken('PONTOVIRG', '(PONTO|END|ELSE)');
+        this.comando();
+      }
+      if(current === 'BEGIN'){
+        this.consumeToken('END', '(PONTO|END|ELSE)');
+      }
     }
     
     comando(){
+      if(this.currentTokenIndex >= this.tokens.length) return;
       const current = this.tokens[this.currentTokenIndex].token;
-      if(current === 'IDENTIFICADOR'){
-        this.consumeToken('IDENTIFICADOR', 'ATRIBUICAO');
-
-        if(this.tokens[this.currentTokenIndex].token === 'ATRIBUICAO'){
-          this.consumeToken('ATRIBUICAO', '(OPSOMA|OPSUB)');
-          this.expressao();
+      if(current === 'IDENTIFICADOR' && this.tokens[this.currentTokenIndex+1]){
+        if(this.tokens[this.currentTokenIndex+1].token === 'AP' ||
+        this.tokens[this.currentTokenIndex+1].token === 'PONTOVIRG'){
+          this.chamadaProcedimento();
         }
-        else if(this.tokens[this.currentTokenIndex].token === 'AP') {
-          this.consumeToken( 'AP', '(OPSOMA|OPSUB|IDENTIFICADOR|AP)');
-          this.listaExpressoes();
-          this.consumeToken('FP');
+        else {
+          this.atribuicao();
         }
+      }
+      else if(current === 'READ' || current === 'WRITE') {
+        this.chamadaProcedimento();
       }
       else if(current === 'BEGIN'){
         this.comandoComposto();
@@ -187,140 +195,117 @@ export class Parser {
       else if(current === 'WHILE'){
         this.comandoRepetitivo();
       }
-      else{
-        this.consumeToken('(IF|WHILE|BEGIN|IDENTIFICADOR)');
-      }
     }
 
     atribuicao(){
       this.variavel();
-      this.consumeToken('ATRIBUICAO', '(OPSOMA|OPSUB)');
+      this.consumeToken('ATRIBUICAO', '(PONTOVIRG|END|ELSE)');
       this.expressao();
     }
 
     variavel(){
-      this.consumeToken('IDENTIFICADOR');
-      if(this.tokens[this.currentTokenIndex].token === 'OPSOMA' || 
-        this.tokens[this.currentTokenIndex].token === 'OPSUB'){
+      this.consumeToken('(IDENTIFICADOR|TRUE|FALSE)', 
+      '(ATRIBUICAO|OPMUL|OPDIV|AND|OPSOMA|OPSUB|OR|IGUALDADE|DIFERENTE|MENOR|MENORIGUAL|MAIORIGUAL|MAIOR|THEN|DO|PONTOVIRG|END|PONTO)');
+      const current = this.tokens[this.currentTokenIndex].token;
+      if(['OPSOMA', 'OPSUB', 'AP', 'NOT'].includes(current)){
           this.expressao();
         }
     }
 
     chamadaProcedimento(){
-      this.consumeToken('IDENTIFICADOR');
-      if(this.tokens[this.currentTokenIndex].token === 'AP'){
-        this.consumeToken('AP', '(OPSOMA|OPSUB)');
+      this.consumeToken('(IDENTIFICADOR|READ|WRITE)', '(PONTOVIRG|END|PONTO)')
+      if(this.tokens[this.currentTokenIndex] && this.tokens[this.currentTokenIndex].token === 'AP'){
+        this.consumeToken('AP', 'PONTOVIRG');
         this.listaExpressoes();
-        this.consumeToken('FP');
+        this.consumeToken('FP', 'PONTOVIRG');
       }
     }
 
     comandoCondicional(){
-      this.consumeToken('IF', '(OPSOMA|OPSUB)');
+      this.consumeToken('IF', '(PONTOVIRG|END|PONTO)');
       this.expressao();
-      this.consumeToken('THEN', '(IF|WHILE|IDENTIFICADOR|BEGIN)');
-      if(this.tokens[this.currentTokenIndex].token === 'ELSE'){
-        this.consumeToken('ELSE');
+      this.consumeToken('THEN', '(PONTOVIRG|END|PONTO)');
+      this.comando();
+      if(this.tokens[this.currentTokenIndex] && this.tokens[this.currentTokenIndex].token === 'ELSE'){
+        this.consumeToken('ELSE', '(PONTOVIRG|END|PONTO)');
         this.comando();
       }
     }
 
     comandoRepetitivo(){
-      this.consumeToken('WHILE');
+      this.consumeToken('WHILE', '(PONTOVIRG|END|PONTO)');
       this.expressao();
-      this.consumeToken('DO');
+      this.consumeToken('DO', '(PONTOVIRG|END|PONTO)');
       this.comando();
     }
 
     // expressões
     expressao(){
       this.expressaoSimples();
-      const current = this.tokens[this.currentTokenIndex].token;
       // = | <> | < | <= | >= | >
-      if(current === 'IGUALDADE' || current === 'DIFERENTE' || current === 'MENOR' ||
-      current === 'MAIOR' || current === 'MAIORIGUAL' || current === 'MENORIGUAL'){
+      if(this.tokens[this.currentTokenIndex] && 
+      ['IGUALDADE', 'DIFERENTE','MENOR', 'MAIOR', 'MENORIGUAL', 'MAIORIGUAL'].includes(this.tokens[this.currentTokenIndex].token)){
         this.relacao();
         this.expressaoSimples();
       }
     }
 
     expressaoSimples(){
+      if(!this.tokens[this.currentTokenIndex]) return;
       if(this.tokens[this.currentTokenIndex].token === 'OPSOMA'){
-        this.consumeToken('OPSOMA', '(IDENTIFICADOR|NOT|NUMINT|NUMFLOAT|AP)')
+        this.consumeToken('OPSOMA')
       }
-      else if(this.tokens[this.currentTokenIndex].token === 'UPSUB'){
-        this.consumeToken('UPSUB', '(IDENTIFICADOR|NOT|NUMINT|NUMFLOAT|AP)')
+      else if(this.tokens[this.currentTokenIndex].token === 'OPSUB'){
+        this.consumeToken('OPSUB')
       }
       this.termo();
-      while(this.currentTokenIndex < this.tokens.length && (
-        this.tokens[this.currentTokenIndex].token === 'OPSOMA' ||
-        this.tokens[this.currentTokenIndex].token === 'OPSUB' ||
-        this.tokens[this.currentTokenIndex].token === 'OR'
-      )) {
-        this.consumeToken('(OPSOMA|OPSUB|OR)', '(IDENTIFICADOR|NOT|NUMINT|NUMFLOAT|AP)');
+      while(this.tokens[this.currentTokenIndex] &&
+        ['OPSOMA', 'OPSUB', 'OR'].includes(this.tokens[this.currentTokenIndex].token)) {
+        this.consumeToken('(OPSOMA|OPSUB|OR)');
         this.termo();
       }
     }
 
     termo(){
       this.fator();
-      while(this.currentTokenIndex < this.tokens.length && (
-            this.tokens[this.currentTokenIndex].token === '*' ||
-            this.tokens[this.currentTokenIndex].token === 'DIV' ||
-            this.tokens[this.currentTokenIndex].token === 'AND')){
-              this.consumeToken('(*|DIV|AND)', '(IDENTIFICADOR|NOT|NUMINT|NUMFLOAT|AP|NOT)');
-              this.fator();
+      while(this.tokens[this.currentTokenIndex] &&
+      ['OPMUL', 'OPDIV', 'AND'].includes(this.tokens[this.currentTokenIndex].token)){
+        this.consumeToken('(OPMUL|OPDIV|AND)');
+        this.fator();
       }
     }
 
     fator(){
+      if(!this.tokens[this.currentTokenIndex]) return;
       const current = this.tokens[this.currentTokenIndex].token;
-      if(current === 'IDENTIFICADOR'){
+      if(['IDENTIFICADOR', 'FALSE', 'TRUE'].includes(current)){
         this.variavel();
       }
-      else if(current === 'NUMINT'){
-        this.consumeToken('NUMINT');
-      }
-      else if(current === 'NUMFLOAT'){
-        this.consumeToken('NUMFLOAT');
-      }
-      else if(current === 'AP'){
-        this.consumeToken('AP', '(OPSOMA|OPSUB)');
-        this.expressao();
-        this.consumeToken('FP');
-      }
-      else if(current === 'NOT'){
-        this.consumeToken('NOT');
-        this.fator();
-      }
-      else{
-        this.consumeToken('(IDENTIFICADOR|NOT|AP|NUMINT|NUMFLOAT)');
+      else {
+        this.consumeToken('(NUMINT|NUMFLOAT|AP|NOT)', 
+        '(VIRG|DO|THEN|FP|PONTOVIRG|PONTO|END|OPMUL|OPDIV|AND OPSOMA|OPSUB|' +
+         'OR|IGUAL|DIFERENTE|MENOR|MENORIGUAL|MAIORIGUAL|MAIOR)');
+        if(current === 'AP'){
+          this.expressao();
+          this.consumeToken('FP');
+        }
+        else if(current === 'NOT'){
+          this.fator();
+        }
       }
     }
 
     relacao(){
-      const current = this.tokens[this.currentTokenIndex].token;
-      if(current === 'IGUALDADE'){
-        this.consumeToken('IGUALDADE');
-      } else if(current === 'MENOR'){
-        this.consumeToken('MENOR');
-      } else if(current === 'MAIOR'){
-        this.consumeToken('MAIOR');
-      } else if(current === 'MENORIGUAL'){
-        this.consumeToken('MENORIGUAL');
-      } else if(current === 'MAIORIGUAL'){
-        this.consumeToken('MAIORIGUAL');
-      }
-      else {
-        this.consumeToken('(IGUALDADE|MENOR|MAIOR|MENORIGUAL|MAIORIGUAL)');
-      }
+      // = | <> | < | <= | >= | >
+      this.consumeToken('(DIFERENTE|IGUALDADE|MENOR|MAIOR|MENORIGUAL|MAIORIGUAL)',
+      '(OPSOMA|OPSUB|IDENTIFICADOR|NUMINT|NUMFLOAT|AP|NOT)');
     }
 
     listaExpressoes(){
       this.expressao();
-      while(this.currentTokenIndex < this.tokens.length && 
+      while(this.tokens[this.currentTokenIndex] && 
         this.tokens[this.currentTokenIndex].token === 'VIRG'){
-          this.consumeToken('VIRG', '(OPSOMA|OPSUB)');
+          this.consumeToken('VIRG');
           this.expressao();
         }
     }

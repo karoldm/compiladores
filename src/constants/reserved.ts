@@ -29,6 +29,7 @@ reservedWords.set("procedure", "PROCEDURE");
 reservedWords.set("int", "INT");
 reservedWords.set("boolean", "BOOLEAN");
 reservedWords.set("read", "READ");
+reservedWords.set("write", "WRITE");
 reservedWords.set("true", "TRUE");
 reservedWords.set("false", "FALSE");
 reservedWords.set("and", "AND");

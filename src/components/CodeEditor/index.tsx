@@ -25,7 +25,7 @@ const LinesCount = styled.div`
   height: 100%;
   font-size: .8rem;
   color: #ccc;
-  width: 1%;
+  width: 1.4rem;
   padding: 1rem .4rem;
   line-height: 1.4rem;
 `;

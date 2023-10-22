@@ -96,12 +96,7 @@ class Lexer {
     if (this.getReserved(substr)) {
       this.populateTable(substr, this.getReserved(substr), finalColumn, false);
     } else if (isValidIdentifier(substr)) {
-      if(substr.length >= 3 && substr.length <= 10){
-        this.populateTable(substr, "IDENTIFICADOR", finalColumn, false);
-      }
-      else {
-        this.populateTable(substr, "INVALID IDENTIFIER SIZE", finalColumn, true);
-      }
+      this.populateTable(substr, "IDENTIFICADOR", finalColumn, false);
     } else {
       this.populateTable(substr, "INVALID IDENTIFIER",finalColumn, true);
     }
