@@ -7,10 +7,7 @@ import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
 import { Lexer } from './functions/lexer';
 import { Parser } from './functions/parser';
-import { ITokens } from './interfaces/table';
-import Tabs from './components/Errors/TabComponent';
-import FirstTab from './components/Errors/AllTabs/FirstTab';
-import SecondTab from './components/Errors/AllTabs/SecondTab';
+import { IToken } from './interfaces/token';
 
 const Container = styled.main`
   display: grid;
@@ -41,21 +38,19 @@ function App() {
   const [code, setCode] = useState("");
   const [file, setFile] = useState("");
   
-  const [tableData, setTableData] = useState<ITokens[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("lexer");
-  const [errorsDataLexer, setErrorsDataLexer] = useState<string[]>([]);
-  const [errorsDataParser, setErrorsDataParser] = useState<string[]>([]);
-
+  const [tableData, setTableData] = useState<IToken[]>([]);
+  const [lexerErrorsData, setLexerErrorsData] = useState<string[]>([]);
+  const [parserErrorsData, setParserErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
     const lexer = new Lexer(code);
     const {table, errors} = lexer.compile();
     setTableData(table);
-    setErrorsDataLexer(errors);
+    setLexerErrorsData(errors);
     
     const parser = new Parser(table);
     const parserErrors = parser.parse();
-    setErrorsDataParser(parserErrors);
+    setParserErrorsData(parserErrors);
   }
 
   useEffect(() => {
@@ -63,7 +58,6 @@ function App() {
   }, [file]);
 
   return (
-    <>
     <Container>
       <div style={{display: 'flex', width: '100%', flexDirection: 'column'}}>
         <ButtonsContainer>
@@ -76,12 +70,11 @@ function App() {
         <CodeEditor code={code} setCode={setCode} />
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
-      {/* <Errors errors={errorsData} /> */}
-      <Tabs setActiveTab={setActiveTab} activeTab={activeTab}/>
-      {activeTab === 'lexer' ? <FirstTab errors={errorsDataLexer} /> : 
-      <SecondTab errors={errorsDataParser} />}  
+      <ErrorsContainer>
+        <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
+        <Errors title={'Erros sintáticos'} errors={parserErrorsData} />
+      </ErrorsContainer>
     </Container>
-    </>
   );
 }
 
