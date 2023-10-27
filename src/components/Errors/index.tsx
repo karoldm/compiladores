@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -26,23 +26,18 @@ const Textarea = styled.textarea`
   overflow-y: scroll;
   border: 1px solid #ccc;
   font-size: .8rem;
-  padding: 1rem;
+  color: rgb(200, 50, 50);;
+  padding-left: 1.5rem;
   line-height: 1.4rem;
 `;
 
-const Title = styled.p`
-  font-size: 1rem;
-  font-weight: bolder;
-  color: black;
-  margin-bottom: .8rem;
-`;
 
 interface Props {
   errors: string[];
   title: string;
 }
 
-export const Errors =  ({ errors, title }: Props) => {
+export const Errors = ({ errors }: Props) => {
   const [errorString, setErrorString] = useState("");
 
   useEffect(() => {
@@ -53,16 +48,14 @@ export const Errors =  ({ errors, title }: Props) => {
     setErrorString(str);
   }, [errors]);
 
+
+
   return (
-     <Container>
-      <Title>{title}</Title>
-      <ContainerTextArea style={{borderColor: errorString ? "red" : "green"}} >
-        <Textarea 
-        style={{color: errorString ? "red" : "green"}} 
-        value= { errorString || "Nenhum erro encontrado :)" } 
-        disabled 
-      />
-      </ContainerTextArea>
-    </Container>
+    <></>
+    // <Container>
+    //   <Textarea value={errorString} disabled />
+    // </Container>
   );
 }
+
+// export default Errors;
