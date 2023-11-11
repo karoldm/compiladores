@@ -47,10 +47,15 @@ function App() {
     const {table, errors} = lexer.compile();
     setTableData(table);
     setLexerErrorsData(errors);
-    
-    const parser = new Parser(table);
-    const parserErrors = parser.parse();
-    setParserErrorsData(parserErrors);
+    if(errors.length === 0){
+      const parser = new Parser(table);
+      const parserErrors = parser.parse();
+      setParserErrorsData(parserErrors);
+
+      if(parserErrors.length === 0){
+        
+      }
+    }
   }
 
   useEffect(() => {
