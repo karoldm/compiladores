@@ -47,3 +47,5 @@ export class SymbolTable {
     delete this.table[escopo];
   }
 }
+
+export type { TipoVariavel, TipoCategoria };

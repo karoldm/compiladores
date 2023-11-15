@@ -7,6 +7,7 @@ import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
 import { Lexer } from './functions/lexer';
 import { Parser } from './functions/parser';
+import { Semantic } from './functions/semantic';
 import { IToken } from './interfaces/token';
 
 const Container = styled.main`
@@ -41,6 +42,7 @@ function App() {
   const [tableData, setTableData] = useState<IToken[]>([]);
   const [lexerErrorsData, setLexerErrorsData] = useState<string[]>([]);
   const [parserErrorsData, setParserErrorsData] = useState<string[]>([]);
+  const [semanticErrorsData, setSemanticErrorsData] = useState<string[]>([]);
 
   const handleCompile = () => {
     const lexer = new Lexer(code);
@@ -53,7 +55,9 @@ function App() {
       setParserErrorsData(parserErrors);
 
       if(parserErrors.length === 0){
-        
+        const semantic = new Semantic(table);
+        const semanticErrors = semantic.semantic;
+        setParserErrorsData(semanticErrors);
       }
     }
   }
@@ -78,6 +82,7 @@ function App() {
       <ErrorsContainer>
         <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
         <Errors title={'Erros sintáticos'} errors={parserErrorsData} />
+        <Errors title={'Erros semânticos'} errors={semanticErrorsData}/>
       </ErrorsContainer>
     </Container>
   );
