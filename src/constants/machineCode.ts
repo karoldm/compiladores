@@ -1,0 +1,31 @@
+const reservedInstruction = new Map();
+reservedInstruction.set("INPP", "INICIAR_PROGRAMA");
+reservedInstruction.set("AMEM", "ALOCAR_MEMORIA");
+reservedInstruction.set("DMEM", "DESALOCAR_MEMORIA");
+reservedInstruction.set("CRVL", "CARREGAR_VALOR");
+reservedInstruction.set("CRCT", "CARREGAR_CONSTANTE");
+reservedInstruction.set("ARMZ", "ARMAZENAR_VALOR");
+reservedInstruction.set("PARA", "PARAR");
+reservedInstruction.set("NADA", "NADA");
+reservedInstruction.set("IMPR", "OPERACAO_IMPRIME");        
+reservedInstruction.set("LEIT", "OPERACAO_LEITURA");        
+reservedInstruction.set("NEGA", "OPERADOR_NOT");
+reservedInstruction.set("MULT", "OPERADOR_MULT");
+reservedInstruction.set("DIVI", "OPERADOR_DIV");
+reservedInstruction.set("CONJ", "OPERADOR_AND");
+reservedInstruction.set("DISJ", "OPERADOR_OR");
+reservedInstruction.set("SOMA", "OPERADOR_SOMA");
+reservedInstruction.set("SUBT", "OPERADOR_SUB");
+reservedInstruction.set("DISJ", "OPERADOR_MULTOR");
+reservedInstruction.set("CMME", "COMPARAR_MENOR");
+reservedInstruction.set("CMMA", "COMPARAR_MAIOR");
+reservedInstruction.set("CMIG", "COMPARAR_IGUAL");
+reservedInstruction.set("CMDG", "COMPARAR_DIFERENTE");
+reservedInstruction.set("CMAG", "COMPARAR_MAIOR_IGUAL");
+reservedInstruction.set("CMEG", "COMPARAR_MENOR_IGUAL");
+reservedInstruction.set("INVR", "INVERTER_SINAL");
+reservedInstruction.set("DSVF", "DESVIAR_SE_FALSE");
+reservedInstruction.set("DSVS", "DESVIAR_SEMPRE");
+
+
+export { reservedInstruction };
