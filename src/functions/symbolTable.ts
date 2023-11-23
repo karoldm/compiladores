@@ -46,6 +46,5 @@ export class SymbolTable {
   remove(token: string, escopo: string){
     delete this.table[escopo];
   }
-}
 
-export type { TipoVariavel, TipoCategoria };
+}

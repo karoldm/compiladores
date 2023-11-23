@@ -1,67 +1,106 @@
 import { IToken } from "../interfaces/token";
-import { SymbolTable, TipoVariavel, TipoCategoria } from "./symbolTable";
+import { ISymbolTable, ISymbolTableRow, TipoCategoria, TipoVariavel } from "../interfaces/SymbolTable";
+import { SymbolTable } from "./symbolTable";
+import { table } from "console";
 
 export class Semantic {
-  table = new SymbolTable();
-  tokens: IToken[];
   errors: string[];
-  escopoAtual: null;
+  escopo: string;
+  tabela: ISymbolTable;
 
-  constructor(tokens: IToken[]) {
-    this.tokens = tokens;
+  constructor(tabela: ISymbolTable) {
+    this.tabela = tabela;
     this.errors = [];
-    this.escopoAtual = null;
+    this.escopo = '';
   }
 
-  semantic(table: SymbolTable, escopoAtual: string = 'global') {
-    switch (table) {
-      case 'TipoVariavel':
-        this.verificaVariavel(table, escopoAtual);
-        break;
-      case 'TipoCategoria':
-        this.VerificaCadeia(table, escopoAtual);
-        break;
+ checkDeclaration(escopo: string, cadeia: string) {
+    if (this.tabela[escopo]) {
+      return this.tabela[escopo].some((symbol) => symbol.cadeia === cadeia);
     }
+    return false;
+  }
+  
+
+  
+checkType(escopo: string, cadeia: string, expectedType: TipoVariavel){
+    const symbol = this.tabela[escopo]?.find((s) => s.cadeia === cadeia);
+    return symbol && symbol.tipo === expectedType;
+  }
+  
+  // Exemplo de uso
+  // const isCorrectType = checkType('global', 'x', 'int');
+  // if (!isCorrectType) {
+  //   console.error('Erro de tipo: A variável x deve ser do tipo int.');
+  
+  
+  // Exemplo simplificado para verificar condições booleanas
+// checkBooleanCondition(condition: boolean) {
+//   if (typeof condition !== 'boolean') {
+//     console.error('Erro: A condição do controle de fluxo deve ser do tipo boolean.');
+//   }
+
+  semantic(){
+    const isCorrectType = this.checkType('global', 'x', 'int');
+    if (!isCorrectType) {
+      this.errors.push(`O tipo da variável está incorreto.`);
+    }
+
+    const isCorrectDeclaration = this.checkDeclaration('global', 'x');
+    if (!isCorrectType) {
+      this.errors.push(`A declaração da vraiável está incorreta`);
+    }
+  
+    return this.errors;
+
   }
 
-
-  verificaVariavel(table: SymbolTable, escopoAtual: string) {
-    const { identificador, tipo, valor } = variavel;
-
-    if (this.table.get(identificador, escopoAtual)) {
-      this.errors.push(`Variável ${identificador} já foi declarada.`);
-    }
-
-    this.table.push(
-      identificador,
-      token,
-      escopoAtual,
-      valor,
-      tipo,
-      TipoCategoria.VAR
-    );
-  }
-
-
-
-  verificaCadeia(table: SymbolTable, escopoAtual: string) {
-    const { identificador, valor } = table;
-
-    const variavel = this.table.get(identificador, escopoAtual);
-    if (!variavel) {
-      this.errors.push(`Variável ${identificador} foi utilizada antes da declaração.`);
-    }
-
-    if (typeof valor !== variavel.tipo) {
-      this.errors.push(
-        `Tipo incorreto: Valor ${typeof valor} não é compatível com tipo ${variavel.tipo}.`
-      );
-    }
-
-    variavel.utilizada = true;
-  }
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
 
 
