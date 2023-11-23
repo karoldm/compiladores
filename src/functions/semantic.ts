@@ -27,18 +27,7 @@ checkType(escopo: string, cadeia: string, expectedType: TipoVariavel){
     const symbol = this.tabela[escopo]?.find((s) => s.cadeia === cadeia);
     return symbol && symbol.tipo === expectedType;
   }
-  
-  // Exemplo de uso
-  // const isCorrectType = checkType('global', 'x', 'int');
-  // if (!isCorrectType) {
-  //   console.error('Erro de tipo: A variável x deve ser do tipo int.');
-  
-  
-  // Exemplo simplificado para verificar condições booleanas
-// checkBooleanCondition(condition: boolean) {
-//   if (typeof condition !== 'boolean') {
-//     console.error('Erro: A condição do controle de fluxo deve ser do tipo boolean.');
-//   }
+
 
   semantic(){
     const isCorrectType = this.checkType('global', 'x', 'int');
