@@ -5,8 +5,8 @@ export type TipoCategoria = 'program' | 'proc' | 'var' | 'param';
 export interface ISymbolTableRow {
   cadeia: string;
   token: string;
-  categoria: TipoCategoria;
-  tipo?: TipoVariavel | TipoCategoria;
+  categoria: TipoCategoria | string;
+  tipo?: TipoVariavel | TipoCategoria | string;
   valor?: number | boolean;
   utilizada: boolean;
 }

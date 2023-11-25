@@ -21,9 +21,9 @@ export class SymbolTable {
     cadeia: string, 
     token: string, 
     escopo: string, 
-    valor: number, 
-    tipo: TipoVariavel | TipoCategoria, 
-    categoria: TipoCategoria
+    valor: number | boolean, 
+    tipo: TipoVariavel | TipoCategoria | string, 
+    categoria: TipoCategoria | string
   ){
     if(!this.table[escopo]){
       this.table[escopo] = []; 

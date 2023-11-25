@@ -53,6 +53,7 @@ function App() {
       const parser = new Parser(table);
       const parserErrors = parser.parse();
       setParserErrorsData(parserErrors);
+      console.log(table);
 
       if(parserErrors.length === 0){
         const semantic = new Semantic(table);
