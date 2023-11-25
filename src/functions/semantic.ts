@@ -14,21 +14,8 @@ export class Semantic {
     this.escopo = '';
   }
 
-  tokensToSymbolTable(tokens: IToken[]) {
-    function addSymbolRow(cadeia: string, token: string, escopo: string, valor?: number | boolean, tipo?: string, categoria: string) {
-      if (!this.tabela[escopo]) {
-        this.tabela[escopo] = [];
-      }
 
-      this.tabela[escopo].push({
-        cadeia,
-        token,
-        escopo,
-        valor,
-        tipo,
-        categoria
-      });
-    }
+  tokensToSymbolTable(tokens: IToken[]) {
     for (const token of tokens) {
       switch (token.token) {
         case 'IDENTIFICADOR':
@@ -58,34 +45,50 @@ export class Semantic {
       }
     }
 
+    function addSymbolRow(this: any, cadeia: string, token: string, escopo: string, valor: number | boolean, tipo: string, categoria: string) {
+      this.tabela[escopo] = [];
+      if (!this.tabela[escopo]) {
+        this.tabela[escopo] = [];
+      }
+
+      this.tabela[escopo].push({
+        cadeia,
+        token,
+        escopo,
+        valor,
+        tipo,
+        categoria
+      });
+    }
+
     return this.tabela;
 
   }
 
 
-  semantic(tokens: IToken[]) {
-    this.tokensToSymbolTable(tokens);
-    this.checkIdentifiers(tabela);
-    this.checkTypes(tabela);
+  semantic(tokens: IToken[]) { 
+    this.tabela = this.tokensToSymbolTable(tokens);
+    this.checkIdentifiers(this.tabela);
+    this.checkTypes(this.tabela);
     return this.errors;
   }
 
   checkIdentifiers(tabela: SymbolTable) {
     for (const escopo in this.tabela) {
-      for (const row of this.tabela[escopo]) {
+      for (const row of this.tabela.table[escopo]) {
         if (!row.utilizada) {
-          this.errors.push(`A variável ${row.cadeia} na linha ${row.linha} não foi utilizada.`);
+          this.errors.push(`A variável ${row.cadeia} não foi utilizada.`);
         }
       }
     }
   }
 
-  checkTypes() {
+  checkTypes(tabela: SymbolTable) {
     for (const escopo in this.tabela) {
-      for (const row of this.tabela[escopo]) {
+      for (const row of this.tabela.table[escopo]) {
         if (row.tipo) {
           if (row.valor !== undefined && typeof row.valor !== row.tipo) {
-            this.errors.push(`Erro de tipo: A variável ${row.cadeia} na linha ${row.linha} tem um tipo incompatível.`);
+            this.errors.push(`Erro de tipo: A variável ${row.cadeia} tem um tipo incompatível.`);
           }
         }
       }
@@ -94,69 +97,6 @@ export class Semantic {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
