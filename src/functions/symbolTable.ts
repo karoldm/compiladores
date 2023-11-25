@@ -22,7 +22,7 @@ export class SymbolTable {
     token: string, 
     escopo: string, 
     valor: number, 
-    tipo: TipoVariavel, 
+    tipo: TipoVariavel | TipoCategoria, 
     categoria: TipoCategoria
   ){
     if(!this.table[escopo]){

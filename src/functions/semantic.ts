@@ -1,49 +1,96 @@
 import { IToken } from "../interfaces/token";
 import { ISymbolTable, ISymbolTableRow, TipoCategoria, TipoVariavel } from "../interfaces/SymbolTable";
 import { SymbolTable } from "./symbolTable";
-import { table } from "console";
 
 export class Semantic {
   errors: string[];
+  tokens: IToken[];
   escopo: string;
-  tabela: ISymbolTable;
+  tabela = new SymbolTable;
 
-  constructor(tabela: ISymbolTable) {
-    this.tabela = tabela;
+  constructor(tokens: IToken[]) {
+    this.tokens = tokens;
     this.errors = [];
     this.escopo = '';
   }
 
- checkDeclaration(escopo: string, cadeia: string) {
-    if (this.tabela[escopo]) {
-      return this.tabela[escopo].some((symbol) => symbol.cadeia === cadeia);
+  tokensToSymbolTable(tokens: IToken[]) {
+    function addSymbolRow(cadeia: string, token: string, escopo: string, valor?: number | boolean, tipo?: string, categoria: string) {
+      if (!this.tabela[escopo]) {
+        this.tabela[escopo] = [];
+      }
+
+      this.tabela[escopo].push({
+        cadeia,
+        token,
+        escopo,
+        valor,
+        tipo,
+        categoria
+      });
     }
-    return false;
+    for (const token of tokens) {
+      switch (token.token) {
+        case 'IDENTIFICADOR':
+          addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'var');
+          break;
+
+        // case 'INT':
+        // case 'BOOLEAN':
+        //   addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'var');
+        //   break;
+
+        case 'PROCEDURE':
+          addSymbolRow(token.lexema, token.token, 'global', 0, 'proc', 'proc');
+          break;
+
+        case 'PROGRAM':
+          addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'program');
+          break;
+
+        case 'PARAM':
+          addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'param');
+          break;
+
+        default:
+   
+          break;
+      }
+    }
+
+    return this.tabela;
+
   }
-  
-
-  
-checkType(escopo: string, cadeia: string, expectedType: TipoVariavel){
-    const symbol = this.tabela[escopo]?.find((s) => s.cadeia === cadeia);
-    return symbol && symbol.tipo === expectedType;
-  }
 
 
-  semantic(){
-    const isCorrectType = this.checkType('global', 'x', 'int');
-    if (!isCorrectType) {
-      this.errors.push(`O tipo da variável está incorreto.`);
-    }
-
-    const isCorrectDeclaration = this.checkDeclaration('global', 'x');
-    if (!isCorrectType) {
-      this.errors.push(`A declaração da vraiável está incorreta`);
-    }
-  
+  semantic(tokens: IToken[]) {
+    this.tokensToSymbolTable(tokens);
+    this.checkIdentifiers(tabela);
+    this.checkTypes(tabela);
     return this.errors;
-
   }
 
+  checkIdentifiers(tabela: SymbolTable) {
+    for (const escopo in this.tabela) {
+      for (const row of this.tabela[escopo]) {
+        if (!row.utilizada) {
+          this.errors.push(`A variável ${row.cadeia} na linha ${row.linha} não foi utilizada.`);
+        }
+      }
+    }
+  }
+
+  checkTypes() {
+    for (const escopo in this.tabela) {
+      for (const row of this.tabela[escopo]) {
+        if (row.tipo) {
+          if (row.valor !== undefined && typeof row.valor !== row.tipo) {
+            this.errors.push(`Erro de tipo: A variável ${row.cadeia} na linha ${row.linha} tem um tipo incompatível.`);
+          }
+        }
+      }
+    }
+  }
 
 
 }
@@ -73,14 +120,34 @@ checkType(escopo: string, cadeia: string, expectedType: TipoVariavel){
 
 
 
-   
 
 
 
 
 
 
-   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

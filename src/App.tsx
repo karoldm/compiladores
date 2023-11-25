@@ -56,7 +56,7 @@ function App() {
 
       if(parserErrors.length === 0){
         const semantic = new Semantic(table);
-        const semanticErrors = semantic.semantic();
+        const semanticErrors = semantic.semantic(table);
         setSemanticErrorsData(semanticErrors);
       }
     }
@@ -82,7 +82,7 @@ function App() {
       <ErrorsContainer>
         <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
         <Errors title={'Erros sintáticos'} errors={parserErrorsData} />
-        <Errors title={'Erros semânticos'} errors={semanticErrorsData}/>
+        <Errors title={'Erros semânticos'} errors={semanticErrorsData}/> 
       </ErrorsContainer>
     </Container>
   );

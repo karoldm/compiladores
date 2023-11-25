@@ -6,7 +6,7 @@ export interface ISymbolTableRow {
   cadeia: string;
   token: string;
   categoria: TipoCategoria;
-  tipo?: TipoVariavel;
+  tipo?: TipoVariavel | TipoCategoria;
   valor?: number | boolean;
   utilizada: boolean;
 }
