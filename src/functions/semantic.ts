@@ -21,31 +21,30 @@ export class Semantic {
         case 'IDENTIFICADOR':
           this.addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'var');
           break;
+          
+        case 'BOOLEAN':
+          this.addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'boolean');
+          break;
 
-          // case 'IDENTIFICADOR':
-          //   addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'var');
-          //   break;
-          
-          // // case 'INT':
-          // // case 'BOOLEAN':
-          // //   addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'var');
-          // //   break;
-          
-          // case 'PROCEDURE':
-          //   addSymbolRow(token.lexema, token.token, 'global', 0, 'proc', 'proc');
-          //   break;
-          
-          // case 'PROGRAM':
-          //   addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'program');
-          //   break;
-          
-          // case 'PARAM':
-          //   addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'param');
-          //   break;
-          
-          default:
-          
-            break;
+        case 'INT':
+          this.addSymbolRow(token.lexema, token.token, 'global', 0, token.token, 'int');
+          break;
+
+        case 'PROCEDURE':
+          this.addSymbolRow(token.lexema, token.token, 'global', 0, 'proc', 'proc');
+          break;
+
+        case 'PROGRAM':
+          this.addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'program');
+          break;
+
+        case 'PARAM':
+          this.addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'param');
+          break;
+
+        default:
+
+          break;
       }
     }
 
@@ -58,6 +57,7 @@ export class Semantic {
 
   semantic = (tokens: IToken[]) => {
     this.tabela = this.tokensToSymbolTable(tokens);
+    this.useVariable();
     this.checkIdentifiers();
     this.checkTypes();
     return this.errors;
@@ -66,8 +66,10 @@ export class Semantic {
   checkIdentifiers = () => {
     for (const escopo in this.tabela.table) {
       for (const row of this.tabela.table[escopo]) {
-        if (!row.utilizada) {
-          this.errors.push(`A variável ${row.cadeia} não foi utilizada.`);
+        if (row.tipo === 'var') {
+          if (!row.utilizada) {
+            this.errors.push(`A variável ${row.cadeia} não foi utilizada.`);
+          }
         }
       }
     }
@@ -76,16 +78,34 @@ export class Semantic {
   checkTypes = () => {
     for (const escopo in this.tabela.table) {
       for (const row of this.tabela.table[escopo]) {
-        if (row.tipo) {
-          if (row.valor !== undefined && typeof row.valor !== row.tipo) {
+        if (row.tipo === 'var') {
+          if (row.valor !== undefined) {
             this.errors.push(`Erro de tipo: A variável ${row.cadeia} tem um tipo incompatível.`);
           }
         }
       }
     }
   };
-}
 
+  useVariable = () => {
+    for (const escopo in this.tabela.table) {
+      for (const row of this.tabela.table[escopo]) {
+        if (row.tipo === 'var') {
+          var identifier = row.cadeia;
+          for (const escopo in this.tabela.table) {
+            var variable = this.tabela.table[escopo].find((row) => row.cadeia === identifier);
+            if (variable) {
+              row.utilizada = true;
+            }
+          }
+        };
+      }
+    }
+  }
+
+
+
+}
 
 
 
