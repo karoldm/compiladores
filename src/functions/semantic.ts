@@ -8,6 +8,8 @@ export class Semantic {
   escopo: string;
   tabela: SymbolTable;
   pilhaTipos: string[];
+  tipoDireito: any = '';
+  tipoEsquerdo: any = '';
 
 
   constructor(tokens: IToken[]) {
@@ -70,115 +72,120 @@ export class Semantic {
 
 
   verificaTokens = (tokens: IToken[]) => {
-    for (const token of this.tokens) {
+    for (const token of tokens) {
       switch (token.token) {
-        case "IDENTIFICADOR":
-          this.pilhaTipos.push(token.lexema);
+        case 'IDENTIFICADOR':
+          this.pilhaTipos.push('IDENTIFICADOR');
           break;
 
-        case "INT":
+        case 'INT':
           this.pilhaTipos.push('INT');
           break;
 
-        case "BOOLEAN":
+        case 'BOOLEAN':
           this.pilhaTipos.push('BOOLEAN');
           break;
 
-        case 'OPSOMA' || 'OPSUB' || 'OPMUL' || 'OPDIV':
-          const tipoDireito = this.pilhaTipos.pop();
-          const tipoEsquerdo = this.pilhaTipos.pop();
-          if (!tipoEsquerdo || !tipoDireito) {
-            this.errors.push(`Linha: ${token.linha} - Operação sem operandos entre ${tipoEsquerdo} e ${tipoDireito}.`);
+        case 'OPSOMA':
+        case 'OPSUB':
+        case 'OPMUL':
+        case 'OPDIV':
+        case 'MENOR':
+        case 'IGUAL':
+        case 'DIFERENTE':
+        case 'MAIOR':
+        case 'MENORIGUAL':
+        case 'MAIORIGUAL':
+          this.tipoDireito = this.pilhaTipos.pop();
+          this.tipoEsquerdo = this.pilhaTipos.pop();
+
+          if (!this.tipoEsquerdo || !this.tipoDireito) {
+            this.errors.push(`Linha: ${token.linha} - Operação sem operandos entre ${this.tipoEsquerdo} e ${this.tipoDireito}.`);
             break;
           }
-          if (tipoEsquerdo !== "INT" || tipoDireito !== "INT") {
+
+          if ((this.tipoEsquerdo !== 'INT' && this.tipoEsquerdo !== 'IDENTIFICADOR') ||
+            (this.tipoDireito !== 'INT' && this.tipoDireito !== 'IDENTIFICADOR')) {
             this.errors.push(`Linha: ${token.linha} - Operação ${token.token} aceita apenas inteiros.`);
           }
-          this.pilhaTipos.push("INT");
+
+          this.pilhaTipos.push('INT');
           break;
 
-
-        case "MENOR" || "IGUAL" || "DIFERENTE" || "MAIOR" || "MENORIGUAL" || "MAIORIGUAL":
-          if (tipoEsquerdo !== tipoDireito) {;
-            this.errors.push(`Linha: ${token.linha} - TOperação ${token.token} aceita apenas boleanos.}.`);
-          }
-          this.pilhaTipos.push("BOOLEAN");
-          break;
-
+        // Adicione outros casos conforme necessário
 
         default:
-          this.errors.push(`Operador desconhecido: ${token.token}`);
+          // Adicione lógica para outros tipos de token, se necessário
           break;
-
       }
-
     }
   }
 
 
-    addSymbolRow = (cadeia: string, token: string, escopo: string, valor: number | boolean, tipo: string, categoria: string) => {
-      this.tabela.push(cadeia, token, escopo, valor, tipo, categoria);
-    };
 
-    semantic = (tokens: IToken[]) => {
-      this.tabela = this.tokensToSymbolTable(tokens);
-      this.verificaTokens(tokens);
-      this.checkIdentifiers();
-      this.checkTypes();
-      return this.errors;
-    };
+  addSymbolRow = (cadeia: string, token: string, escopo: string, valor: number | boolean, tipo: string, categoria: string) => {
+    this.tabela.push(cadeia, token, escopo, valor, tipo, categoria);
+  };
 
-    checkIdentifiers = () => {
-      for (const escopo in this.tabela.table) {
-        for (const row of this.tabela.table[escopo]) {
-          if (row.tipo === 'var') {
-            this.useVariable(row.cadeia);
-          }
-        }
-      }
+  semantic = (tokens: IToken[]) => {
+    this.tabela = this.tokensToSymbolTable(tokens);
+    this.verificaTokens(tokens);
+    this.checkIdentifiers();
+    this.checkTypes();
+    return this.errors;
+  };
 
-      for (const escopo in this.tabela.table) {
-        for (const row of this.tabela.table[escopo]) {
-          if (row.categoria === 'var') {
-            if (!row.utilizada) {
-              this.errors.push(`A variável ${row.cadeia} não foi utilizada.`);
-            }
-          }
-        }
-      }
-    };
-
-    checkTypes = () => {
-      for (const escopo in this.tabela.table) {
-        for (const row of this.tabela.table[escopo]) {
-          if (row.tipo === 'var') {
-            if (row.valor !== undefined) {
-              this.errors.push(`Erro de tipo: A variável ${row.cadeia} tem um tipo incompatível.`);
-            }
-          }
-        }
-      }
-    };
-
-    useVariable = (identifier: string) => {
-      let count = 0;
-      for (const escopo in this.tabela.table) {
-        for (const row of this.tabela.table[escopo]) {
-          if (row.categoria === 'var' && row.cadeia === identifier) {
-            count++;
-            if (count > 1) {
-              row.utilizada = true;
-            }
-          }
-
+  checkIdentifiers = () => {
+    for (const escopo in this.tabela.table) {
+      for (const row of this.tabela.table[escopo]) {
+        if (row.tipo === 'var') {
+          this.useVariable(row.cadeia);
         }
       }
     }
 
+    for (const escopo in this.tabela.table) {
+      for (const row of this.tabela.table[escopo]) {
+        if (row.categoria === 'var') {
+          if (!row.utilizada) {
+            // this.errors.push(`A variável ${row.cadeia} não foi utilizada.`);
+          }
+        }
+      }
+    }
+  };
 
+  checkTypes = () => {
+    for (const escopo in this.tabela.table) {
+      for (const row of this.tabela.table[escopo]) {
+        if (row.tipo === 'var') {
+          if (row.valor !== undefined) {
+            this.errors.push(`Erro de tipo: A variável ${row.cadeia} tem um tipo incompatível.`);
+          }
+        }
+      }
+    }
+  };
 
+  useVariable = (identifier: string) => {
+    let count = 0;
+    for (const escopo in this.tabela.table) {
+      for (const row of this.tabela.table[escopo]) {
+        if (row.categoria === 'var' && row.cadeia === identifier) {
+          count++;
+          if (count > 1) {
+            row.utilizada = true;
+          }
+        }
 
+      }
+    }
   }
+
+
+
+
+}
 
 
 
