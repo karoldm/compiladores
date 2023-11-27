@@ -1,13 +1,14 @@
 import { ISymbolTable, TipoCategoria, TipoVariavel } from '../interfaces/SymbolTable';
 
 export class SymbolTable {
+  [x: string]: any;
   table: ISymbolTable;
 
   constructor() {
     this.table = {};
   }
 
-  updateValue(escopo: string, cadeia: string, valor: number | boolean){
+  updateValue(escopo: string, cadeia: string, valor: number | boolean | undefined){
     if(this.table[escopo]){
       this.table[escopo].forEach(row => {
         if(row.cadeia === cadeia){
@@ -21,7 +22,7 @@ export class SymbolTable {
     cadeia: string, 
     token: string, 
     escopo: string, 
-    valor: number | boolean, 
+    valor: number | boolean | undefined, 
     tipo: TipoVariavel | TipoCategoria | string, 
     categoria: TipoCategoria | string
   ){
