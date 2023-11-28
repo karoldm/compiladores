@@ -57,8 +57,9 @@ function App() {
 
       if(parserErrors.length === 0){
         const semantic = new Semantic(table);
-        const semanticErrors = semantic.semantic(table);
+        const {errors: semanticErrors, table: tableSemantic} = semantic.semantic(table);
         setSemanticErrorsData(semanticErrors);
+        console.log(tableSemantic)
       }
     }
   }

@@ -9,12 +9,38 @@ export class SymbolTable {
   }
 
   updateValue(escopo: string, cadeia: string, valor: number | boolean | undefined){
-    if(this.table[escopo]){
-      this.table[escopo].forEach(row => {
+    if(this.table['global']){
+      this.table['global'].forEach(row => {
         if(row.cadeia === cadeia){
           row.valor = valor;
         }
       })
+    } else {
+      if(this.table[escopo]){
+        this.table[escopo].forEach(row => {
+          if(row.cadeia === cadeia){
+            row.valor = valor;
+          }
+        })
+      }
+    }
+  }
+
+  updateUtilizada(escopo: string, cadeia: string, utilizada: boolean){
+    if(this.table['global']){
+      this.table['global'].forEach(row => {
+        if(row.cadeia === cadeia){
+          row.utilizada = utilizada;
+        }
+      })
+    } else {
+      if(this.table[escopo]){
+        this.table[escopo].forEach(row => {
+          if(row.cadeia === cadeia){
+            row.utilizada = utilizada;
+          }
+        })
+      }
     }
   }
 
@@ -41,7 +67,7 @@ export class SymbolTable {
   }
 
   get(cadeia: string, escopo: string){
-    return this.table[escopo].find(t => t.cadeia === cadeia);
+    return this.table['global'].find(t => t.cadeia === cadeia) ?? this.table[escopo].find(t => t.cadeia === cadeia);
   }
 
   remove(token: string, escopo: string){
