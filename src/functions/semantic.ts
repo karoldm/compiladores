@@ -199,6 +199,96 @@ export class Semantic {
           this.pilhaTipos.push('end');
           break;
 
+        case 'IF':
+              this.i++; 
+              while (tokens[this.i].token !== "THEN") {
+                if(tokens[this.i].token === "IDENTIFICADOR"){
+                    if(!this.hasSymbol(tokens[this.i].lexema, 'global')){
+                    this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} não declarada`);
+                  }
+                }
+                 switch(tokens[this.i].token){
+                 case 'MENOR':
+                 case 'MAIOR':
+                 case 'MENORIGUAL':
+                 case 'MAIORIGUAL':
+                 case 'IGUAL':
+                 case 'DIFERENTE':
+                  if(tokens[this.i+1].token === "TRUE" || tokens[this.i+1].token === "FALSE" || (
+                  tokens[this.i+1].token === "IDENTIFICADOR" && (this.getTipo(tokens[this.i+1].token) === true || 
+                  (this.getTipo(tokens[this.i+1].token) === false || this.getTipo(tokens[this.i+1].token) === true) ))){
+                    this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
+                  } 
+                  else if (tokens[this.i+1].token === "IDENTIFICADOR"){
+                    if(!this.hasSymbol(tokens[this.i+1].lexema, 'global')){
+                    this.errors.push(`Linha ${tokens[this.i+1].linha} - Variável ${tokens[this.i+1].lexema} não declarada`);
+                  }
+                  }
+                  break;
+                 }
+                this.i++;
+                
+              }
+              this.i++;
+              break;
+
+            case 'WHILE':   
+            this.i++; 
+            while (tokens[this.i].token !== "FP") {
+              if(tokens[this.i].token === "IDENTIFICADOR"){
+                  if(!this.hasSymbol(tokens[this.i].lexema, 'global')){
+                  this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} não declarada`);
+                }
+              }
+               switch(tokens[this.i].token){
+               case 'MENOR':
+               case 'MAIOR':
+               case 'MENORIGUAL':
+               case 'MAIORIGUAL':
+               case 'IGUAL':
+               case 'DIFERENTE':
+                if(tokens[this.i+1].token === "TRUE" || tokens[this.i+1].token === "FALSE" || (
+                tokens[this.i+1].token === "IDENTIFICADOR" && (this.getTipo(tokens[this.i+1].token) === true || 
+                (this.getTipo(tokens[this.i+1].token) === false || this.getTipo(tokens[this.i+1].token) === true) ))){
+                  this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
+                } 
+                else if (tokens[this.i+1].token === "IDENTIFICADOR"){
+                  if(!this.hasSymbol(tokens[this.i+1].lexema, 'global')){
+                  this.errors.push(`Linha ${tokens[this.i+1].linha} - Variável ${tokens[this.i+1].lexema} não declarada`);
+                }
+                }
+                break;
+               }
+              this.i++;
+              
+            }
+            this.i++;
+            break;
+
+            
+              // this.addSymbolRow(token.lexema, token.token, 'global', undefined, this.tipoAtual, token.token);
+              // while(tokens[this.i].token !== "THEN"){
+              // this.i++;
+              // token = tokens[this.i];
+              // }
+              // if(!this.hasSymbol(token.lexema, 'global')){
+              //   this.addSymbolRow(token.lexema, token.token, 'global', undefined, this.tipoAtual, token.token);
+              // }
+              // else {
+              //   this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} já declarada`);
+              // }
+              
+        
+        //   this.addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'end');
+        //   this.pilhaTipos.push('end');
+        //   break;
+
+        // case 'THEN':
+        //   this.addSymbolRow(token.lexema, token.token, 'global', 0, 'program', 'end');
+        //   this.pilhaTipos.push('end');
+        //   break;
+
+
       }
     }
 
