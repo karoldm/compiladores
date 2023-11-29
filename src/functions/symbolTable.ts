@@ -67,7 +67,6 @@ export class SymbolTable {
   }
 
   get(cadeia: string, escopo: string){
-    console.log()
     if(this.table['global']){
       if(this.table['global'].find(t => t.cadeia === cadeia))
       return this.table['global'].find(t => t.cadeia === cadeia);

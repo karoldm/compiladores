@@ -4,7 +4,7 @@ import { SymbolTable } from "./symbolTable";
 export class Semantic {
   errors: string[];
   tokens: IToken[];
-  escopo: string;
+  pilhaEscopo: string[];
   tabela: SymbolTable;
   pilhaTipos: string[];
   tipoDireito: any = '';
@@ -15,7 +15,7 @@ export class Semantic {
   constructor(tokens: IToken[]) {
     this.tokens = tokens;
     this.errors = [];
-    this.escopo = 'global';
+    this.pilhaEscopo = ['global'];
     this.tabela = new SymbolTable();
     this.pilhaTipos = [];
     this.i = 0;
@@ -34,8 +34,8 @@ export class Semantic {
 
         case 'IDENTIFICADOR':
           if (this.i-1 > 0 && (tokens[this.i-1].token === "BOOLEAN" || tokens[this.i-1].token === "INT")){
-            if(!this.tabela.get(token.lexema, this.escopo)){
-              this.addSymbolRow(token.lexema, token.token, this.escopo, undefined, this.tipoAtual, token.token);
+            if(!this.tabela.get(token.lexema, this.getEscopo())){
+              this.addSymbolRow(token.lexema, token.token,  this.getEscopo(), undefined, this.tipoAtual, token.token);
             }
             else {
               this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} 
@@ -45,8 +45,8 @@ export class Semantic {
             while(tokens[this.i].token === "VIRG" && this.i < tokens.length) {
               this.i++;
               token = tokens[this.i];
-              if(!this.tabela.get(token.lexema, this.escopo)){
-                this.addSymbolRow(token.lexema, token.token, this.escopo, undefined, this.tipoAtual, token.token);
+              if(!this.tabela.get(token.lexema,  this.getEscopo())){
+                this.addSymbolRow(token.lexema, token.token,  this.getEscopo(), undefined, this.tipoAtual, token.token);
               }
               else {
                 this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} já declarada`);
@@ -56,32 +56,32 @@ export class Semantic {
           }
 
           else if(this.i+1 < tokens.length && tokens[this.i+1].token === "ATRIBUICAO"){
-            if(!this.tabela.get(token.lexema, this.escopo)){
+            if(!this.tabela.get(token.lexema,  this.getEscopo())){
               this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} 
               não declarada`);
             }
             else {
                 this.i++;
                 let op = [];
-                let tipo = this.tabela.get(token.lexema, this.escopo)?.tipo;
+                let tipo = this.tabela.get(token.lexema,  this.getEscopo())?.tipo;
                 this.i++;
-                this.tabela.updateUtilizada(token.lexema, this.escopo, true);
+                this.tabela.updateUtilizada(token.lexema,  this.getEscopo(), true);
                 while(["IDENTIFICADOR", "TRUE", "FALSE", "NUMINT", "NUMFLOAT",
               "OPSOMA", "OPSUB", "OPMUL", "OPDIV", "MENOR", "IGUAL", "MENORIGUAL", 
               "MAIOR", "MAIORIGUAL", "DIFERENTE"].includes(tokens[this.i].token) && 
               this.i < tokens.length){
                   if(tokens[this.i].token === "IDENTIFICADOR"){
-                    if(!this.tabela.get(tokens[this.i].lexema, this.escopo)){
+                    if(!this.tabela.get(tokens[this.i].lexema,  this.getEscopo())){
                       this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} 
                       não declarada.`)
                     }
-                    else if(this.tabela.get(tokens[this.i].lexema, this.escopo)?.tipo !== tipo){
-                      this.errors.push(`Linha ${tokens[this.i].linha} - Atribuição de ${this.tabela.get(tokens[this.i].lexema, this.escopo)?.tipo}
+                    else if(this.tabela.get(tokens[this.i].lexema,  this.getEscopo())?.tipo !== tipo){
+                      this.errors.push(`Linha ${tokens[this.i].linha} - Atribuição de ${this.tabela.get(tokens[this.i].lexema,  this.getEscopo())?.tipo}
                      a uma variável do tipo ${tipo}`);
                     }
                     else {
-                      op.push(this.tabela.get(tokens[this.i].lexema, this.escopo)?.valor);
-                      this.tabela.updateUtilizada(tokens[this.i].lexema, this.escopo, true);
+                      op.push(this.tabela.get(tokens[this.i].lexema,  this.getEscopo())?.valor);
+                      this.tabela.updateUtilizada(tokens[this.i].lexema,  this.getEscopo(), true);
 
                     }
                   }
@@ -119,35 +119,65 @@ export class Semantic {
                   }
                   else if(tokens[this.i].token === "AND" || tokens[this.i].token === "OR"){
                     if("boolean" !== tipo){
-                      this.errors.push(`Linha ${tokens[this.i].linha} - Operação de ${this.tabela.get(tokens[this.i].lexema, this.escopo)?.tipo} sobre ${tipo}`);
+                      this.errors.push(`Linha ${tokens[this.i].linha} - Operação de ${this.tabela.get(tokens[this.i].lexema,  this.getEscopo())?.tipo} sobre ${tipo}`);
                     }
                     else {
                       op.push(tokens[this.i].lexema);
                     }
                   }
-            
                   this.i++
                 }
+                this.i--;
                 let total = eval(op.join(" "));
-                this.tabela.updateValue(this.escopo, token.lexema, total);
+                this.tabela.updateValue( this.getEscopo(), token.lexema, total);
               }
           }
           break;
 
         case 'PROCEDURE':
-          this.escopo = 'private';
+          this.i++;
+          token = tokens[this.i];
+          if(!this.tabela.get(token.lexema,  this.getEscopo())) {
+            this.addSymbolRow(token.lexema, token.token,  this.getEscopo(), undefined, this.tipoAtual, token.token);
+          }
+          else {
+            this.errors.push(`Linha ${tokens[this.i].linha} - Procedure ${tokens[this.i].lexema} 
+            já declarada`);
+          }
+          this.pilhaEscopo.push(tokens[this.i].lexema);
           break;
 
         case 'END':
-          this.escopo = 'global';
+          this.pilhaEscopo = this.pilhaEscopo.slice(0, -1);
+          break;
+
+        case 'VAR':
+          this.i++;
+          let vars = [tokens[this.i]];
+          this.i++;
+          while(tokens[this.i].token === "VIRG" && this.i < tokens.length) {
+            this.i++;
+            token = tokens[this.i];
+            if(!this.tabela.get(token.lexema,  this.getEscopo())){
+              vars.push(token);
+            }
+            else {
+              this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} já declarada`);
+            }
+            this.i++;
+          }
+          this.i++;
+          this.tipoAtual = tokens[this.i].lexema;
+          vars.forEach(v => {
+            this.addSymbolRow(v.lexema, v.token,  this.getEscopo(), undefined, this.tipoAtual, v.token);
+          });
           break;
 
         case 'IF':
               this.i++; 
-         
               while (tokens[this.i].token !== "THEN" && this.i < tokens.length) {
                 if(tokens[this.i].token === "IDENTIFICADOR"){
-                    if(!this.tabela.get(tokens[this.i].lexema, this.escopo)){
+                    if(!this.tabela.get(tokens[this.i].lexema,  this.getEscopo())){
                     this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} não declarada`);
                   }
                 }
@@ -160,12 +190,12 @@ export class Semantic {
                  case 'DIFERENTE':
                   if(tokens[this.i+1].token === "TRUE" || tokens[this.i+1].token === "FALSE" || (
                   tokens[this.i+1].token === "IDENTIFICADOR" && 
-                  (this.tabela.get(tokens[this.i+1].lexema, this.escopo)?.tipo === "boolean"))){
+                  (this.tabela.get(tokens[this.i+1].lexema,  this.getEscopo())?.tipo === "boolean"))){
 
                     this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
                   } 
                   else if (tokens[this.i+1].token === "IDENTIFICADOR"){
-                    if(!this.tabela.get(tokens[this.i+1].lexema, this.escopo)){
+                    if(!this.tabela.get(tokens[this.i+1].lexema,  this.getEscopo())){
                     this.errors.push(`Linha ${tokens[this.i+1].linha} - Variável ${tokens[this.i+1].lexema} não declarada`);
                   }
                   }
@@ -179,7 +209,7 @@ export class Semantic {
             this.i++; 
             while (tokens[this.i].token !== "DO" && this.i < tokens.length) {
               if(tokens[this.i].token === "IDENTIFICADOR"){
-                  if(!this.tabela.get(tokens[this.i].lexema, this.escopo)){
+                  if(!this.tabela.get(tokens[this.i].lexema,  this.getEscopo())){
                   this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} não declarada`);
                 }
               }
@@ -196,12 +226,12 @@ export class Semantic {
                 (this.getTipo(tokens[this.i+1].token) === true || 
                 (this.getTipo(tokens[this.i+1].token) === false || 
                 this.getTipo(tokens[this.i+1].token) === true) || 
-                (this.tabela.get(tokens[this.i+1].lexema, this.escopo)?.tipo === "boolean") 
+                (this.tabela.get(tokens[this.i+1].lexema,  this.getEscopo())?.tipo === "boolean") 
                 ||  (this.checkBoolean(tokens[this.i+1].lexema)) )))){
                   this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
                 } 
                 else if (tokens[this.i+1].token === "IDENTIFICADOR"){
-                  if(!this.tabela.get(tokens[this.i+1].lexema, this.escopo)){
+                  if(!this.tabela.get(tokens[this.i+1].lexema,  this.getEscopo())){
                   this.errors.push(`Linha ${tokens[this.i+1].linha} - Variável ${tokens[this.i+1].lexema} não declarada`);
                 }
                 }
@@ -219,6 +249,9 @@ export class Semantic {
     return value === "TRUE" ? true : value === "FALSE" ? false : +value;
   }
 
+  getEscopo(){
+    return this.pilhaEscopo[this.pilhaEscopo.length-1];
+  }
 
   obterTipoVariavel(identificador: string) {
     for (const escopo in this.tabela.table) {
@@ -229,7 +262,6 @@ export class Semantic {
       }
     }
   }
-
 
   addSymbolRow = (cadeia: string, token: string, escopo: string, valor: number | boolean | undefined, tipo: string, categoria: string) => {
     this.tabela.push(cadeia, token, escopo, valor, tipo, categoria);

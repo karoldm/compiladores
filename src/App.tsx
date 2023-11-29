@@ -82,8 +82,9 @@ function App() {
         <CodeEditor code={code} setCode={setCode} />
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
-      <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada", "escopo"]} datas={tableSemantic['global']} escopo={'global'} />
-      <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada", "escopo"]} datas={tableSemantic['private']} escopo={'private'} />
+      {Object.keys(tableSemantic).map(key => 
+        <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada", "escopo"]} datas={tableSemantic[key]} escopo={key} />
+      )}
       <ErrorsContainer>
         <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
         <Errors title={'Erros sintáticos'} errors={parserErrorsData} />
