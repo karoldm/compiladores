@@ -129,6 +129,8 @@ export class Semantic {
                 }
                 this.i--;
                 let total = eval(op.join(" "));
+                console.log( token.lexema)
+                console.log(total)
                 this.tabela.updateValue( this.getEscopo(), token.lexema, total);
               }
           }
