@@ -205,7 +205,7 @@ export class Parser {
 
     variavel(){
       this.consumeToken('(IDENTIFICADOR|TRUE|FALSE)', 
-      '(ATRIBUICAO|OPMUL|OPDIV|AND|OPSOMA|OPSUB|OR|IGUALDADE|DIFERENTE|MENOR|MENORIGUAL|MAIORIGUAL|MAIOR|THEN|DO|PONTOVIRG|END|PONTO)');
+      '(ATRIBUICAO|OPMUL|OPDIV|AND|OPSOMA|OPSUB|OR|IGUAL|DIFERENTE|MENOR|MENORIGUAL|MAIORIGUAL|MAIOR|THEN|DO|PONTOVIRG|END|PONTO)');
       const current = this.tokens[this.currentTokenIndex].token;
       if(['OPSOMA', 'OPSUB', 'AP', 'NOT'].includes(current)){
           this.expressao();
@@ -244,7 +244,7 @@ export class Parser {
       this.expressaoSimples();
       // = | <> | < | <= | >= | >
       if(this.tokens[this.currentTokenIndex] && 
-      ['IGUALDADE', 'DIFERENTE','MENOR', 'MAIOR', 'MENORIGUAL', 'MAIORIGUAL'].includes(this.tokens[this.currentTokenIndex].token)){
+      ['IGUAL', 'DIFERENTE','MENOR', 'MAIOR', 'MENORIGUAL', 'MAIORIGUAL'].includes(this.tokens[this.currentTokenIndex].token)){
         this.relacao();
         this.expressaoSimples();
       }
@@ -297,7 +297,7 @@ export class Parser {
 
     relacao(){
       // = | <> | < | <= | >= | >
-      this.consumeToken('(DIFERENTE|IGUALDADE|MENOR|MAIOR|MENORIGUAL|MAIORIGUAL)',
+      this.consumeToken('(DIFERENTE|IGUAL|MENOR|MAIOR|MENORIGUAL|MAIORIGUAL)',
       '(OPSOMA|OPSUB|IDENTIFICADOR|NUMINT|NUMFLOAT|AP|NOT)');
     }
 

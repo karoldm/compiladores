@@ -171,9 +171,7 @@ export class Semantic {
                   break;
                  }
                 this.i++;
-                
               }
-              this.i++;
               break;
 
             case 'WHILE':   
@@ -211,7 +209,6 @@ export class Semantic {
               this.i++;
               
             }
-            this.i++;
             break;
       }
     }
