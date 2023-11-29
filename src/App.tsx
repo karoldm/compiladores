@@ -5,6 +5,7 @@ import { CodeEditor } from "./components/CodeEditor";
 import { Errors } from "./components/Errors";
 import { FileInput } from './components/FileInput';
 import { Table } from "./components/Table";
+import { TableSemantic } from './components/Table/TableSemantic';
 import { Lexer } from './functions/lexer';
 import { Parser } from './functions/parser';
 import { Semantic } from './functions/semantic';
@@ -43,6 +44,7 @@ function App() {
   const [lexerErrorsData, setLexerErrorsData] = useState<string[]>([]);
   const [parserErrorsData, setParserErrorsData] = useState<string[]>([]);
   const [semanticErrorsData, setSemanticErrorsData] = useState<string[]>([]);
+  const [tableSemantic, setTableSemantic] = useState<any>({});
 
   const handleCompile = () => {
     const lexer = new Lexer(code);
@@ -53,13 +55,12 @@ function App() {
       const parser = new Parser(table);
       const parserErrors = parser.parse();
       setParserErrorsData(parserErrors);
-      console.log(table);
 
       if(parserErrors.length === 0){
         const semantic = new Semantic(table);
-        const {errors: semanticErrors, table: tableSemantic} = semantic.semantic(table);
+        const {errors: semanticErrors, table: tableSemanticData} = semantic.semantic(table);
         setSemanticErrorsData(semanticErrors);
-        console.log(tableSemantic)
+        setTableSemantic(tableSemanticData.table);
       }
     }
   }
@@ -81,6 +82,7 @@ function App() {
         <CodeEditor code={code} setCode={setCode} />
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
+      <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada"]} datas={tableSemantic['global']} />
       <ErrorsContainer>
         <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
         <Errors title={'Erros sintáticos'} errors={parserErrorsData} />

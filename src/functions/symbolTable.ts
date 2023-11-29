@@ -26,7 +26,7 @@ export class SymbolTable {
     }
   }
 
-  updateUtilizada(escopo: string, cadeia: string, utilizada: boolean){
+  updateUtilizada(cadeia: string, escopo: string, utilizada: boolean){
     if(this.table['global']){
       this.table['global'].forEach(row => {
         if(row.cadeia === cadeia){
