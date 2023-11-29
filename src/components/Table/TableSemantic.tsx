@@ -32,11 +32,12 @@ const Container = styled.div`
 `;
 
 interface Props {
-    columns: any[];
+    columns: string[];
     datas: any;
+    escopo: string;
   }
 
-export const TableSemantic = ({columns, datas}: Props) => {
+export const TableSemantic = ({columns, datas, escopo}: Props) => {
 
     return(
        <Container>
@@ -51,10 +52,13 @@ export const TableSemantic = ({columns, datas}: Props) => {
                     <tr key={key}>
                         {columns.map((c, index) => {
                           if(c === "utilizada") {
-                            return <td key={index}>{datas[key][c] ? "true" : "false"}</td>;
+                            return <td key={index}>{datas[key][c] ? "true" : "false"}</td>
+                          }
+                          else if(c === "escopo"){
+                            return <td key={index}>{escopo}</td>
                           }
                           else {
-                            return <td key={index}>{datas[key][c]}</td>;
+                            return <td key={index}>{datas[key][c]}</td>
                           }
                         })}
                     </tr>

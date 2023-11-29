@@ -82,7 +82,8 @@ function App() {
         <CodeEditor code={code} setCode={setCode} />
       </div>
       <Table columns={["lexema", "token", "linha", "coluna_inicial", "coluna_final"]} datas={tableData} />
-      <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada"]} datas={tableSemantic['global']} />
+      <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada", "escopo"]} datas={tableSemantic['global']} escopo={'global'} />
+      <TableSemantic columns={["cadeia", "categoria", "tipo", "valor", "utilizada", "escopo"]} datas={tableSemantic['private']} escopo={'private'} />
       <ErrorsContainer>
         <Errors title={'Erros léxicos'} errors={lexerErrorsData} />
         <Errors title={'Erros sintáticos'} errors={parserErrorsData} />

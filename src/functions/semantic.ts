@@ -34,17 +34,18 @@ export class Semantic {
 
         case 'IDENTIFICADOR':
           if (this.i-1 > 0 && (tokens[this.i-1].token === "BOOLEAN" || tokens[this.i-1].token === "INT")){
-            if(!this.hasSymbol(token.lexema, this.escopo)){
+            if(!this.tabela.get(token.lexema, this.escopo)){
               this.addSymbolRow(token.lexema, token.token, this.escopo, undefined, this.tipoAtual, token.token);
             }
             else {
               this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} 
             já declarada`);
-            }            this.i++;
+            }            
+            this.i++;
             while(tokens[this.i].token === "VIRG" && this.i < tokens.length) {
               this.i++;
               token = tokens[this.i];
-              if(!this.hasSymbol(token.lexema, this.escopo)){
+              if(!this.tabela.get(token.lexema, this.escopo)){
                 this.addSymbolRow(token.lexema, token.token, this.escopo, undefined, this.tipoAtual, token.token);
               }
               else {
@@ -55,7 +56,7 @@ export class Semantic {
           }
 
           else if(this.i+1 < tokens.length && tokens[this.i+1].token === "ATRIBUICAO"){
-            if(!this.hasSymbol(token.lexema, this.escopo)){
+            if(!this.tabela.get(token.lexema, this.escopo)){
               this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} 
               não declarada`);
             }
@@ -133,12 +134,12 @@ export class Semantic {
           }
           break;
 
-        case 'BEGIN':
-          this.escopo = 'global';
+        case 'PROCEDURE':
+          this.escopo = 'private';
           break;
 
         case 'END':
-          this.escopo = 'private';
+          this.escopo = 'global';
           break;
 
         case 'IF':
@@ -146,7 +147,7 @@ export class Semantic {
          
               while (tokens[this.i].token !== "THEN" && this.i < tokens.length) {
                 if(tokens[this.i].token === "IDENTIFICADOR"){
-                    if(!this.hasSymbol(tokens[this.i].lexema, this.escopo)){
+                    if(!this.tabela.get(tokens[this.i].lexema, this.escopo)){
                     this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} não declarada`);
                   }
                 }
@@ -164,7 +165,7 @@ export class Semantic {
                     this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
                   } 
                   else if (tokens[this.i+1].token === "IDENTIFICADOR"){
-                    if(!this.hasSymbol(tokens[this.i+1].lexema, this.escopo)){
+                    if(!this.tabela.get(tokens[this.i+1].lexema, this.escopo)){
                     this.errors.push(`Linha ${tokens[this.i+1].linha} - Variável ${tokens[this.i+1].lexema} não declarada`);
                   }
                   }
@@ -178,7 +179,7 @@ export class Semantic {
             this.i++; 
             while (tokens[this.i].token !== "DO" && this.i < tokens.length) {
               if(tokens[this.i].token === "IDENTIFICADOR"){
-                  if(!this.hasSymbol(tokens[this.i].lexema, this.escopo)){
+                  if(!this.tabela.get(tokens[this.i].lexema, this.escopo)){
                   this.errors.push(`Linha ${tokens[this.i].linha} - Variável ${tokens[this.i].lexema} não declarada`);
                 }
               }
@@ -200,14 +201,13 @@ export class Semantic {
                   this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
                 } 
                 else if (tokens[this.i+1].token === "IDENTIFICADOR"){
-                  if(!this.hasSymbol(tokens[this.i+1].lexema, this.escopo)){
+                  if(!this.tabela.get(tokens[this.i+1].lexema, this.escopo)){
                   this.errors.push(`Linha ${tokens[this.i+1].linha} - Variável ${tokens[this.i+1].lexema} não declarada`);
                 }
                 }
                 break;
                }
               this.i++;
-              
             }
             break;
       }
@@ -253,17 +253,6 @@ export class Semantic {
 
       }
     }
-  }
-
-  hasSymbol = (cadeia: string, escopo: string) => {
-    for (const escopo in this.tabela.table) {
-      for (const row of this.tabela.table[escopo]) {
-        if (cadeia === row.cadeia) {
-          return true
-        }
-      }
-    }
-    return false;
   }
 
   checkBoolean = (cadeia: string) => {
