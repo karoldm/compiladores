@@ -6,9 +6,6 @@ export class Semantic {
   tokens: IToken[];
   pilhaEscopo: string[];
   tabela: SymbolTable;
-  pilhaTipos: string[];
-  tipoDireito: any = '';
-  tipoEsquerdo: any = '';
   tipoAtual: string = '';
   i: number; 
 
@@ -17,7 +14,6 @@ export class Semantic {
     this.errors = [];
     this.pilhaEscopo = ['global'];
     this.tabela = new SymbolTable();
-    this.pilhaTipos = [];
     this.i = 0;
   }
 
@@ -129,8 +125,6 @@ export class Semantic {
                 }
                 this.i--;
                 let total = eval(op.join(" "));
-                console.log( token.lexema)
-                console.log(total)
                 this.tabela.updateValue( this.getEscopo(), token.lexema, total);
               }
           }
@@ -229,7 +223,7 @@ export class Semantic {
                 (this.getTipo(tokens[this.i+1].token) === false || 
                 this.getTipo(tokens[this.i+1].token) === true) || 
                 (this.tabela.get(tokens[this.i+1].lexema,  this.getEscopo())?.tipo === "boolean") 
-                ||  (this.checkBoolean(tokens[this.i+1].lexema)) )))){
+                ||  this.tabela.get(tokens[this.i+1].lexema, this.getEscopo())?.tipo === 'boolean' )))){
                   this.errors.push(`Linha ${tokens[this.i].linha} - Operação só pode ser realizada entre inteiros`);
                 } 
                 else if (tokens[this.i+1].token === "IDENTIFICADOR"){
@@ -255,15 +249,6 @@ export class Semantic {
     return this.pilhaEscopo[this.pilhaEscopo.length-1];
   }
 
-  obterTipoVariavel(identificador: string) {
-    for (const escopo in this.tabela.table) {
-      for (const row of this.tabela.table[escopo]) {
-        if (row.cadeia === identificador) {
-          return row.token;
-        }
-      }
-    }
-  }
 
   addSymbolRow = (cadeia: string, token: string, escopo: string, valor: number | boolean | undefined, tipo: string, categoria: string) => {
     this.tabela.push(cadeia, token, escopo, valor, tipo, categoria);
@@ -273,31 +258,6 @@ export class Semantic {
     this.tabela = this.tokensToSymbolTable(tokens);
     return {errors: this.errors, table: this.tabela};
   };
-
-  useVariable = (identifier: string) => {
-    let count = 0;
-    for (const escopo in this.tabela.table) {
-      for (const row of this.tabela.table[escopo]) {
-        if (row.categoria === 'var' && row.cadeia === identifier) {
-          count++;
-          if (count > 1) {
-            row.utilizada = true;
-          }
-        }
-
-      }
-    }
-  }
-
-  checkBoolean = (cadeia: string) => {
-    for (const escopo in this.tabela.table) {
-      for (const row of this.tabela.table[escopo]) {
-        if (row.tipo === 'BOOLEAN' && row.cadeia === cadeia) {
-          return true;
-      }
-    }
-  };
-}
 }
 
 
