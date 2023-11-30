@@ -2,7 +2,7 @@
 
 ## Integrantes: 
 - Karolyne Domiciano Marques
-- -Bruna Dos Santos Anselmo
+- Bruna Dos Santos Anselmo
 
 ## Tecnologias usadas
 - Typescript
